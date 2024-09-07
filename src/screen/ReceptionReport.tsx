@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, StatusBar, TouchableOpacity, Modal, Image } fro
 import { COLORS } from '../theme/theme';
 
 
-const ReceptionReport = ({ navigation }) => {
+const ReceptionReport = ({ navigation, route }) => {
+    const {user} = route.params;
     const [modalVisible, setModalVisible] = useState(false);
 
     const handleModalToggle = () => {
@@ -16,7 +17,7 @@ const ReceptionReport = ({ navigation }) => {
     
       const handlePressToUpload = () => {
         setModalVisible(false);
-        navigation.navigate('UploadReception');
+        navigation.navigate('UploadReception', {user});
       };
     
       const handlePressToInput = () => {
@@ -24,7 +25,7 @@ const ReceptionReport = ({ navigation }) => {
         navigation.navigate('ReceptionInput');
       };
       const handlePressToHistory = () => {
-        navigation.navigate('ReceptionHistory');
+        navigation.navigate('ReceptionHistory', {user});
       }
       const goBack = () => {
         navigation.goBack();

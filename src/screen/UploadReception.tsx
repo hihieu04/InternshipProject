@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-function UploadReception({ navigation }): React.JSX.Element {
+function UploadReception({ navigation, route }) {
+    const { user } = route.params;
     const [selectedImage, setSelectedImage] = useState(null);
 
     const selectImage = () => {
@@ -17,20 +18,37 @@ function UploadReception({ navigation }): React.JSX.Element {
         });
     };
 
-    const resetImage = () => {
-        setSelectedImage(null);
+    const submitReport = () => {
+        if (selectedImage) {
+            const fileName = selectedImage.split('/').pop(); // Lấy tên file từ đường dẫn
+            const reportData = {
+                userId: user.user_id,
+                name: 'Bao cao 1',
+                waterLevelArea: 'Khu vực A',
+                date: new Date().toISOString().split('T')[0],
+                cream_latex_kg: 200.0,
+                block_latex_kg: 150.0,
+                sheet_latex_kg: 200.0,
+                frozen_latex_kg: 50.0,
+                cup_latex_kg: 30.0,
+                wire_latex_kg: 20.0,
+                total_harvest_latex_kg: 450.0,
+                imageName: fileName,
+            };
+            navigation.navigate('EditDataReception', { user, reportData });
+        } else {
+            Alert.alert('Vui lòng chọn ảnh trước khi nộp báo cáo.');
+        }
     };
-    const goBack = () => {
-        navigation.goBack()
-    };
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={goBack}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Image source={require('../images/back.png')} style={styles.icon}></Image>
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Chọn tập tin</Text>
-                <TouchableOpacity onPress={resetImage}>
+                <TouchableOpacity onPress={() => setSelectedImage(null)}>
                     <Text style={styles.exitText}>Thoát</Text>
                 </TouchableOpacity>
             </View>
@@ -42,10 +60,13 @@ function UploadReception({ navigation }): React.JSX.Element {
                         <Text style={styles.uploadButtonText}>Chọn tập tin</Text>
                     </TouchableOpacity>
                 )}
+                <TouchableOpacity style={styles.submitButton} onPress={submitReport}>
+                    <Text style={styles.submitButtonText}>Nộp báo cáo</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -96,6 +117,18 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         resizeMode: 'stretch',
+    },
+    submitButton: {
+        width: '50%',
+        padding: 15,
+        backgroundColor: '#007BFF',
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    submitButtonText: {
+        color: '#FFFFFF',
+        fontSize: 18,
     },
 });
 

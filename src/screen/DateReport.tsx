@@ -3,7 +3,8 @@ import { Image, Modal, StatusBar, StyleSheet, Text, TouchableOpacity, View } fro
 import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../theme/theme';
 
-function DateReport({ navigation }) {
+function DateReport({ navigation, route }) {
+  const {user} = route.params;
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleModalToggle = () => {
@@ -17,15 +18,15 @@ function DateReport({ navigation }) {
 
   const handlePressToUpload = () => {
     setModalVisible(false);
-    navigation.navigate('UploadDate');
+    navigation.navigate('UploadDate', {user});
   };
 
   const handlePressToInput = () => {
     setModalVisible(false);
-    navigation.navigate('DateInput');
+    navigation.navigate('DateInput', {user});
   };
   const handlePressToHistory = () => {
-    navigation.navigate('DateHistory');
+    navigation.navigate('DateHistory', {user: user});
   }
   const goBack = () => {
     navigation.goBack();

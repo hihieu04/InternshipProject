@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
-function UploadDate({ navigation }) {
+function UploadDate({ navigation, route }) {
+    const {user} = route.params;
     const [selectedImage, setSelectedImage] = useState(null);
 
     const selectImage = () => {
@@ -21,34 +22,32 @@ function UploadDate({ navigation }) {
         if (selectedImage) {
             const fileName = selectedImage.split('/').pop(); // Lấy tên file từ đường dẫn
             const reportData = {
-                imageLink: selectedImage,
-                fileName: fileName,
-                userId: 1, // Thay thế bằng ID người dùng thực tế
+                imageName: fileName,
+                userId: user.user_id,
                 waterLevelArea: 'Khu vực A',
                 date: new Date().toISOString().split('T')[0],
                 attendancePoint: 1,  // Đã điểm danh (1: true, 0: false)
                 personalEquipmentCheck: 'Đã kiểm tra',
                 confirmSign: 'Đã ký',
                 mainRubber: {
-                    lot_name: 'Lot A',
+                    lo_name: 'Lo A',
                     nh3_liters: 100.5,
-                    first_batch_kg: 200.0,
-                    first_batch_block: 'Block A',
-                    first_batch_stove: 'Stove A',
-                    second_batch_kg: 150.0,
-                    second_batch_block: 'Block B',
-                    second_batch_stove: 'Stove B',
-                    scraped_rubber: 'Scraped Rubber A'
+                    first_batch_cream: 200.0,
+                    first_batch_block: 200.0,
+                    first_batch_stove: 200.0,
+                    second_batch_block: 150.0,
+                    second_batch_stove: 250.0,
+                    coagulated_latex: 150.0
                 },
                 secondaryRubber: {
-                    lot_name: 'Lot B',
+                    lo_name: 'Lo B',
                     frozen_kg: 50.0,
                     stew_kg: 30.0,
                     wire_kg: 20.0,
                     total_harvest_kg: 100.0
                 }
             };
-            navigation.navigate('EditData', { reportData });
+            navigation.navigate('EditDataDate', {user, reportData });
         } else {
             Alert.alert('Vui lòng chọn ảnh trước khi nộp báo cáo.');
         }

@@ -10,7 +10,7 @@ import More from './More';
 const Tab = createBottomTabNavigator();
 
 function Manage({navigation, route}) {
-    //const {account, user} = route.params;
+    const {user} = route.params;
     const goBack = () => {
         navigation.goBack();
       }
@@ -39,7 +39,7 @@ function Manage({navigation, route}) {
                             />
                         ),
                     }}
-                    initialParams={{ goBack }}
+                    initialParams={{ user, goBack }}
                 />
                 <Tab.Screen 
                     name="Nhắc nhở" 

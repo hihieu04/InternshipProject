@@ -10,42 +10,68 @@ function Login({ navigation }): React.JSX.Element {
     const onPressHide = () => {
         setHidePass(!hidePass);
     }
-
     const LoginHandlerToManage = async () => {
-        // try {
-        //     const response = await fetch('http://192.168.1.212:3000/login', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             username: username,
-        //             password: password,
-        //         }),
-        //     });
-        
-        //     if (response.status === 200) {
-        //         const result = await response.json();
-        //         console.log(result);  // Log kết quả để kiểm tra
+        try {
+            const response = await fetch('http://192.168.1.7:3000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            });
     
-        //         if (result.account && result.user) {
-        //             navigation.navigate('Manage', {
-        //                 account: result.account,
-        //                 user: result.user
-        //             });
-        //         } else {
-        //             Alert.alert('Login Failed', 'Account or user information not found');
-        //         }
-        //     } else {
-        //         const errorResult = await response.json();
-        //         Alert.alert('Login Failed', errorResult.message || 'Invalid email or password');
-        //     }
-        // } catch (error) {
-        //     console.error('Login error:', error);
-        //     Alert.alert('Login Error', 'There was an error logging in. Please try again.');
-        // }
-            navigation.navigate('Manage');
+            const result = await response.json();
+    
+            if (response.ok) {
+                navigation.navigate('Manage', { 
+                    user: result
+                });
+            } else {
+                Alert.alert('Login Failed', result.message || 'Invalid username or password');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Alert.alert('Error', 'Something went wrong. Please try again later.');
+        }
     };
+    // const LoginHandlerToManage = async () => {
+    //     try {
+    //         const response = await fetch('http://192.168.1.46:3000/login', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 username: username,
+    //                 password: password,
+    //             }),
+    //         });
+        
+    //         if (response.status === 200) {
+    //             const result = await response.json();
+    //             console.log(result);  // Log kết quả để kiểm tra
+    
+    //             if (result.account && result.user) {
+    //                 navigation.navigate('HomeManage', {
+    //                     user: result.user,  // Truyền đối tượng user vào đây
+    //                     goBack: () => navigation.goBack(),  // Truyền hàm goBack để xử lý khi người dùng muốn quay lại
+    //                 });
+    //             } else {
+    //                 Alert.alert('Login Failed', 'Không tìm thấy tài khoản');
+    //             }
+    //         } else {
+    //             const errorResult = await response.json();
+    //             Alert.alert('Login Failed', errorResult.message || 'Username hoặc password bị trống');
+    //         }
+    //     } catch (error) {
+    //         console.error('Login error:', error);
+    //         Alert.alert('Login Error', 'There was an error logging in. Please try again.');
+    //     }
+    // };
+    
     
     
     

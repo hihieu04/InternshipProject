@@ -4,26 +4,25 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 
 const EditData = ({ navigation, route }) => {
-    const { reportData } = route.params;
+    const { user, reportData } = route.params;
     const [date, setDate] = useState(new Date(reportData.date));
     const [waterLevelArea, setWaterLevelArea] = useState(reportData.waterLevelArea);
     const [attendancePoint, setAttendancePoint] = useState(!!reportData.attendancePoint);
     const [personalEquipmentCheck, setPersonalEquipmentCheck] = useState(reportData.personalEquipmentCheck);
     const [confirmSign, setConfirmSign] = useState(reportData.confirmSign);
     const [mainRubber, setMainRubber] = useState({
-        lot_name: reportData.mainRubber.lot_name || '',
+        lo_name: reportData.mainRubber.lo_name || '',
         nh3_liters: reportData.mainRubber.nh3_liters?.toString() || '',
-        first_batch_kg: reportData.mainRubber.first_batch_kg?.toString() || '',
-        first_batch_block: reportData.mainRubber.first_batch_block || '',
-        first_batch_stove: reportData.mainRubber.first_batch_stove || '',
-        second_batch_kg: reportData.mainRubber.second_batch_kg?.toString() || '',
-        second_batch_block: reportData.mainRubber.second_batch_block || '',
-        second_batch_stove: reportData.mainRubber.second_batch_stove || '',
-        scraped_rubber: reportData.mainRubber.scraped_rubber || ''
+        first_batch_cream: reportData.mainRubber.first_batch_cream?.toString() || '',
+        first_batch_block: reportData.mainRubber.first_batch_block.toString() || '',
+        first_batch_stove: reportData.mainRubber.first_batch_stove.toString() || '',
+        second_batch_block: reportData.mainRubber.second_batch_block.toString() || '',
+        second_batch_stove: reportData.mainRubber.second_batch_stove.toString() || '',
+        coagulated_latex: reportData.mainRubber.coagulated_latex.toString() || ''
     });
 
     const [secondaryRubber, setSecondaryRubber] = useState({
-        lot_name: reportData.secondaryRubber.lot_name || '',
+        lo_name: reportData.secondaryRubber.lo_name || '',
         frozen_kg: reportData.secondaryRubber.frozen_kg?.toString() || '',
         stew_kg: reportData.secondaryRubber.stew_kg?.toString() || '',
         wire_kg: reportData.secondaryRubber.wire_kg?.toString() || '',
@@ -43,12 +42,16 @@ const EditData = ({ navigation, route }) => {
 
     const submitReport = async () => {
         try {
-            // Chuyển đổi các giá trị float từ string về số
+            // Chuyển string -> float
             const mainRubberData = {
                 ...mainRubber,
                 nh3_liters: parseFloat(mainRubber.nh3_liters),
-                first_batch_kg: parseFloat(mainRubber.first_batch_kg),
-                second_batch_kg: parseFloat(mainRubber.second_batch_kg)
+                first_batch_cream: parseFloat(mainRubber.first_batch_cream),
+                first_batch_block: parseFloat(mainRubber.first_batch_block),
+                first_batch_stove: parseFloat(mainRubber.first_batch_stove),
+                second_batch_block: parseFloat(mainRubber.second_batch_block),
+                second_batch_stove: parseFloat(mainRubber.second_batch_stove),
+                coagulated_latex: parseFloat(mainRubber.coagulated_latex)
             };
     
             const secondaryRubberData = {
@@ -65,26 +68,26 @@ const EditData = ({ navigation, route }) => {
                 attendancePoint: attendancePoint ? 1 : 0,
                 personalEquipmentCheck: personalEquipmentCheck,
                 confirmSign: confirmSign,
-                imageLink: reportData.imageLink,
+                imageName: reportData.imageName,
                 mainRubber: mainRubberData,
                 secondaryRubber: secondaryRubberData
             });
     
-            const response = await axios.post('http://192.168.1.212:3000/upload', {
+            const response = await axios.post('http://192.168.1.7:3000/datereports/create', {
                 userId: reportData.userId,
                 waterLevelArea: waterLevelArea,
                 date: date.toISOString().split('T')[0],
                 attendancePoint: attendancePoint ? 1 : 0,
                 personalEquipmentCheck: personalEquipmentCheck,
                 confirmSign: confirmSign,
-                imageLink: reportData.imageLink,
+                imageName: reportData.imageName,
                 mainRubber: mainRubberData,
                 secondaryRubber: secondaryRubberData
             });
     
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Báo cáo đã được gửi thành công!', [
-                    { text: 'OK', onPress: () => navigation.navigate('DateReport') }
+                    { text: 'OK', onPress: () => navigation.navigate('DateReport', {user}) }
                 ]);
             } else {
                 Alert.alert('Lỗi', 'Không thể gửi báo cáo. Vui lòng thử lại.');
@@ -169,8 +172,8 @@ const EditData = ({ navigation, route }) => {
                         <Text style={styles.label}>Tên lô:</Text>
                         <TextInput
                             style={styles.input}
-                            value={mainRubber.lot_name}
-                            onChangeText={(text) => setMainRubber({ ...mainRubber, lot_name: text })}
+                            value={mainRubber.lo_name}
+                            onChangeText={(text) => setMainRubber({ ...mainRubber, lo_name: text })}
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -188,8 +191,8 @@ const EditData = ({ navigation, route }) => {
                         <Text style={styles.label}>Kem:</Text>
                         <TextInput
                             style={styles.input}
-                            value={mainRubber.first_batch_kg}
-                            onChangeText={(text) => setMainRubber({ ...mainRubber, first_batch_kg: text })}
+                            value={mainRubber.first_batch_cream}
+                            onChangeText={(text) => setMainRubber({ ...mainRubber, first_batch_cream: text })}
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -215,8 +218,8 @@ const EditData = ({ navigation, route }) => {
                         <Text style={styles.label}>Khối:</Text>
                         <TextInput
                             style={styles.input}
-                            value={mainRubber.second_batch_kg}
-                            onChangeText={(text) => setMainRubber({ ...mainRubber, second_batch_kg: text })}
+                            value={mainRubber.second_batch_block}
+                            onChangeText={(text) => setMainRubber({ ...mainRubber, second_batch_block: text })}
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -224,15 +227,15 @@ const EditData = ({ navigation, route }) => {
                         <TextInput
                             style={styles.input}
                             value={mainRubber.second_batch_block}
-                            onChangeText={(text) => setMainRubber({ ...mainRubber, second_batch_block: text })}
+                            onChangeText={(text) => setMainRubber({ ...mainRubber, second_batch_stove: text })}
                         />
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Mủ đánh đông:</Text>
                         <TextInput
                             style={styles.input}
-                            value={mainRubber.second_batch_stove}
-                            onChangeText={(text) => setMainRubber({ ...mainRubber, second_batch_stove: text })}
+                            value={mainRubber.coagulated_latex}
+                            onChangeText={(text) => setMainRubber({ ...mainRubber, coagulated_latex: text })}
                         />
                     </View>
                 </View>
@@ -244,8 +247,8 @@ const EditData = ({ navigation, route }) => {
                         <Text style={styles.label}>Tên lô:</Text>
                         <TextInput
                             style={styles.input}
-                            value={secondaryRubber.lot_name}
-                            onChangeText={(text) => setSecondaryRubber({ ...secondaryRubber, lot_name: text })}
+                            value={secondaryRubber.lo_name}
+                            onChangeText={(text) => setSecondaryRubber({ ...secondaryRubber, lo_name: text })}
                         />
                     </View>
                     <View style={styles.inputGroup}>

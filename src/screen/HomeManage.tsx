@@ -14,8 +14,10 @@ import DateHistory from './DateHistory';
 import DateHistoryDetail from './DateHistoryDetail';
 import ReceptionHistory from './ReceptionHistory';
 import ReceptionHistoryDetail from './ReceptionHistoryDetail';
-import EditData from './EditData';
+import EditData from './EditDataDate';
 import ReceptionInput from './ReceptionInput';
+import EditDataDate from './EditDataDate';
+import EditDataReception from './EditDateReception';
 // import DateReportManage from './DateReportManage';
 
 
@@ -27,7 +29,9 @@ function HomeManage({route}): React.JSX.Element {
     <NavigationContainer independent={true}>
       <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home"
-          component={Home} initialParams={goBack}/>
+          component={Home}
+          initialParams={{ user, goBack }}
+        />
         
         <Stack.Screen name="DateReport" component={DateReport} />
         <Stack.Screen name="PhotoDateReport" component={PhotoDateReport} />
@@ -41,10 +45,12 @@ function HomeManage({route}): React.JSX.Element {
         <Stack.Screen name="ReceptionHistory" component={ReceptionHistory} />
         <Stack.Screen name="ReceptionHistoryDetail" component={ReceptionHistoryDetail}/>
         <Stack.Screen name="ReceptionInput" component={ReceptionInput}/>
-        <Stack.Screen name="EditData" component={EditData}/>
+        <Stack.Screen name="EditDataDate" component={EditDataDate}/>
+        <Stack.Screen name="EditDataReception" component={EditDataReception}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
 
 export default HomeManage;

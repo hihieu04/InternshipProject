@@ -1,57 +1,130 @@
-import React from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 import { COLORS } from '../theme/theme';
 
-const reports = [
-    { id: '1', title: 'Báo cáo 1', date: '2024-07-20', content: 'Báo cáo 1' },
-    { id: '2', title: 'Báo cáo 2', date: '2024-07-19', content: 'Chào nhé' },
-    { id: '3', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '4', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '5', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '6', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '7', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '8', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '9', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '10', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '11', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '12', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '13', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-    { id: '14', title: 'Báo cáo 3', date: '2024-07-18' , content: 'Chào nhé' },
-];
+function ReceptionHistory({ navigation, route }) {
+    const { user } = route.params;
+    const userId = user.user_id;
+    const [reports, setReports] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-function ReceptionHistory({ navigation }) {
+    useEffect(() => {
+        axios.get(`http://192.168.1.7:3000/receptionreports`, {
+            params: {
+                userId: userId
+            }
+        })
+            .then(response => {
+                console.log('Reports fetched:', response.data);
+                setReports(response.data);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching reports:', error);
+                setLoading(false);
+                if (error.response) {
+                    Alert.alert('Error', `Unable to fetch reports. Server responded with status code ${error.response.status}`);
+                } else if (error.request) {
+                    Alert.alert('Error', 'Unable to fetch reports. No response from server.');
+                } else {
+                    Alert.alert('Error', `Unable to fetch reports. Error: ${error.message}`);
+                }
+            });
+    }, [userId]);
 
     const handlePressToDetail = (report) => {
-        // Điều hướng đến chi tiết báo cáo hoặc bất kỳ hành động nào khác
-        navigation.navigate('ReceptionHistoryDetail', { report: report });
+        navigation.navigate('ReceptionHistoryDetail', { user: user, reportId: report.reception_report_id });
     };
 
-    const goBack = () => {
-        navigation.goBack();
+    const handleDeleteReport = (reportId) => {
+        Alert.alert(
+            'Xác nhận xóa',
+            'Bạn chắc chắn muốn xóa báo cáo này?',
+            [
+                { text: 'Hủy', style: 'cancel' },
+                { text: 'Xóa', onPress: () => deleteReport(reportId) },
+            ]
+        );
     };
-    const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.itemContainer} onPress={() => handlePressToDetail(item)}>
-            <View style={styles.itemContent}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.date}>{item.date}</Text>
+
+    const deleteReport = (reportId) => {
+        axios.delete(`http://192.168.1.7:3000/receptionreports/${reportId}`)
+            .then(() => {
+                setReports(reports.filter(report => report.reception_report_id !== reportId));
+                Alert.alert('Thành công', 'Báo cáo đã được xóa.');
+            })
+            .catch(error => {
+                console.error('Error deleting report:', error);
+                Alert.alert('Error', 'Unable to delete report.');
+            });
+    };
+
+    const renderItem = ({ item }) => {
+        const formattedDate = new Date(item.date).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+
+        return (
+            <View style={styles.itemContainer}>
+                 <TouchableOpacity onPress={() => handlePressToDetail(item)}>
+                    <View style={styles.itemContent}>
+                        {/* Wrapping all text inside <Text> components */}
+                        <Text style={styles.title}>{item.name}</Text>
+                        <Text style={styles.title}>ID: {item.reception_report_id}</Text>
+                        <Text style={styles.date}>{formattedDate}</Text>
+                    </View>
+                </TouchableOpacity>
+                <View style={styles.actions}>
+                    <TouchableOpacity onPress={() => navigation.navigate('EditReceptionReport', { report: item })}>
+                        <Text style={styles.editText}>Sửa</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDeleteReport(item.reception_report_id)}>
+                        <Text style={styles.deleteText}>Xóa</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </TouchableOpacity>
-    );
+        );
+    };
+
+    if (loading) {
+        return <ActivityIndicator size="large" color={COLORS.primaryDarkGreyHex} />;
+    }
+
+    if (reports.length === 0) {
+        return (
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <View style={styles.innerHeader}>
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Image source={require('../images/back.png')} style={styles.icon} />
+                        </TouchableOpacity>
+                        <Text style={styles.textInHeader}>Lịch sử báo cáo tiếp nhận</Text>
+                    </View>
+                </View>
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>Trống</Text>
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.innerHeader}>
-                    <TouchableOpacity onPress={goBack}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Image source={require('../images/back.png')} style={styles.icon} />
                     </TouchableOpacity>
-                    <Text style={styles.textInHeader}>Lịch sử báo cáo</Text>
+                    <Text style={styles.textInHeader}>Lịch sử báo cáo tiếp nhận</Text>
                 </View>
             </View>
             <FlatList
                 data={reports}
                 renderItem={renderItem}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item.reception_report_id.toString()}
             />
         </View>
     );
@@ -63,8 +136,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.primaryWhiteHex,
     },
     header: {
-        //flex: 3,
-        marginBottom: 10
+        marginBottom: 10,
     },
     innerHeader: {
         backgroundColor: 'green',
@@ -77,7 +149,7 @@ const styles = StyleSheet.create({
         height: 30,
         resizeMode: 'stretch',
         margin: 10,
-      },
+    },
     textInHeader: {
         color: COLORS.primaryWhiteHex,
         fontSize: 24,
@@ -87,7 +159,7 @@ const styles = StyleSheet.create({
         marginVertical: 5,
         borderRadius: 10,
         margin: 10,
-        borderWidth: 1
+        borderWidth: 1,
     },
     itemContent: {
         flexDirection: 'row',
@@ -101,6 +173,27 @@ const styles = StyleSheet.create({
     },
     date: {
         fontSize: 14,
+        color: COLORS.primaryDarkGreyHex,
+    },
+    actions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 10,
+    },
+    editText: {
+        marginRight: 20,
+        color: 'blue',
+    },
+    deleteText: {
+        color: 'red',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyText: {
+        fontSize: 24,
         color: COLORS.primaryDarkGreyHex,
     },
 });

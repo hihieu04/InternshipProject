@@ -4,11 +4,12 @@ import { COLORS } from '../theme/theme';
 
 function Home({ navigation, route }): React.JSX.Element {
   const {user, goBack} = route.params;
+  console.log(route.params); // Kiểm tra xem `user` và `goBack` có tồn tại hay không
   const handleToDateReport = () => {
-    navigation.navigate('DateReport')
+    navigation.navigate('DateReport',{user: user} )
   }
   const handleToReceptionReport = () => {
-    navigation.navigate('ReceptionReport')
+    navigation.navigate('ReceptionReport',{user: user})
   }
   return (
     <ImageBackground style={styles.container} source={require('../images/home1.jpg')}>
@@ -18,7 +19,7 @@ function Home({ navigation, route }): React.JSX.Element {
             <TouchableOpacity>
               <Image source={require('../images/user.png')} style={styles.icon} />
             </TouchableOpacity>
-            <Text style={styles.textInHeader}>Xin chào, Hieu</Text>
+            <Text style={styles.textInHeader}>Xin chào, {user.lastname} </Text>
           </View>
           <TouchableOpacity onPress={goBack}>
             <Image source={require('../images/switch.png')} style={styles.icon} />
