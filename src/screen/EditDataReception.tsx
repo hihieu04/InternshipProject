@@ -10,6 +10,7 @@ const EditDataReception = ({ navigation, route }) => {
     const [name, setName] = useState(reportData.name || '');
     const [date, setDate] = useState(new Date(reportData.date));
     const [waterLevelArea, setWaterLevelArea] = useState(reportData.waterLevelArea);
+    const [licensePlate, setLicensePlate] = useState(reportData.licensePlate);
     const [creamLatexKg, setCreamLatexKg] = useState(reportData.cream_latex_kg?.toString() || '');
     const [blockLatexKg, setBlockLatexKg] = useState(reportData.block_latex_kg?.toString() || '');
     const [sheetLatexKg, setSheetLatexKg] = useState(reportData.sheet_latex_kg?.toString() || '');
@@ -32,12 +33,12 @@ const EditDataReception = ({ navigation, route }) => {
 
     const submitReport = async () => {
         try {
-            // Chuyển đổi dữ liệu từ string -> float trước khi gửi
             const reportDataToSend = {
-                user_id: reportData.userId,
+                userId: reportData.userId,
                 name: name,
                 waterLevelArea: waterLevelArea,
                 date: date.toISOString().split('T')[0],
+                licensePlate: licensePlate,
                 cream_latex_kg: parseFloat(creamLatexKg),
                 block_latex_kg: parseFloat(blockLatexKg),
                 sheet_latex_kg: parseFloat(sheetLatexKg),
@@ -45,10 +46,10 @@ const EditDataReception = ({ navigation, route }) => {
                 cup_latex_kg: parseFloat(cupLatexKg),
                 wire_latex_kg: parseFloat(wireLatexKg),
                 total_harvest_latex_kg: parseFloat(totalHarvestLatexKg),
-                image_name: reportData.imageName
+                imageName: reportData.imageName
             };
 
-            const response = await axios.post('http://192.168.1.7:3000/uploadReceptionReport', reportDataToSend);
+            const response = await axios.post('http://192.168.1.33:3000/receptionreports/create', reportDataToSend);
 
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Báo cáo đã được gửi thành công!', [
@@ -87,7 +88,14 @@ const EditDataReception = ({ navigation, route }) => {
                         onChangeText={setWaterLevelArea}
                     />
                 </View>
-
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Số xe:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={licensePlate}
+                        onChangeText={setLicensePlate}
+                    />
+                </View>
                 {/* Ngày cạo */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Ngày cạo:</Text>

@@ -22,7 +22,7 @@ const ReceptionReport = ({ navigation, route }) => {
     
       const handlePressToInput = () => {
         setModalVisible(false);
-        navigation.navigate('ReceptionInput');
+        navigation.navigate('ReceptionInput', {user});
       };
       const handlePressToHistory = () => {
         navigation.navigate('ReceptionHistory', {user});

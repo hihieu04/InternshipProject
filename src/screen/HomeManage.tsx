@@ -17,7 +17,7 @@ import ReceptionHistoryDetail from './ReceptionHistoryDetail';
 import EditData from './EditDataDate';
 import ReceptionInput from './ReceptionInput';
 import EditDataDate from './EditDataDate';
-import EditDataReception from './EditDateReception';
+import EditDataReception from './EditDataReception';
 // import DateReportManage from './DateReportManage';
 
 

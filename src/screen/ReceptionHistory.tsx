@@ -10,7 +10,7 @@ function ReceptionHistory({ navigation, route }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://192.168.1.7:3000/receptionreports`, {
+        axios.get(`http://192.168.1.33:3000/receptionreports`, {
             params: {
                 userId: userId
             }
@@ -49,7 +49,7 @@ function ReceptionHistory({ navigation, route }) {
     };
 
     const deleteReport = (reportId) => {
-        axios.delete(`http://192.168.1.7:3000/receptionreports/${reportId}`)
+        axios.delete(`http://192.168.1.33:3000/receptionreports/${reportId}`)
             .then(() => {
                 setReports(reports.filter(report => report.reception_report_id !== reportId));
                 Alert.alert('Thành công', 'Báo cáo đã được xóa.');
@@ -71,7 +71,6 @@ function ReceptionHistory({ navigation, route }) {
             <View style={styles.itemContainer}>
                  <TouchableOpacity onPress={() => handlePressToDetail(item)}>
                     <View style={styles.itemContent}>
-                        {/* Wrapping all text inside <Text> components */}
                         <Text style={styles.title}>{item.name}</Text>
                         <Text style={styles.title}>ID: {item.reception_report_id}</Text>
                         <Text style={styles.date}>{formattedDate}</Text>

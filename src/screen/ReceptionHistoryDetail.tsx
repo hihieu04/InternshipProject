@@ -10,7 +10,7 @@ const ReceptionHistoryDetail = ({ navigation, route }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     useEffect(() => {
-        axios.get(`http://192.168.1.7:3000/receptionreports/${reportId}`)
+        axios.get(`http://192.168.1.33:3000/receptionreports/${reportId}`)
             .then(response => {
                 setReport(response.data);
                 setLoading(false);
@@ -50,7 +50,7 @@ const ReceptionHistoryDetail = ({ navigation, route }) => {
                 total_harvest_latex_kg: parseFloat(report.total_harvest_latex_kg)
             };
 
-            const response = await axios.post('http://192.168.1.7:3000/history/receptionreports/update', updatedReport);
+            const response = await axios.post('http://192.168.1.33:3000/history/receptionreports/update', updatedReport);
             if (response.status === 200) {
                 Alert.alert('Success', 'Report updated successfully!');
                 navigation.goBack();
@@ -84,6 +84,22 @@ const ReceptionHistoryDetail = ({ navigation, route }) => {
             <Text style={styles.name}>{user.firstname} {user.lastname}</Text>
 
             <ScrollView contentContainerStyle={styles.formContainer}>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Khu tiếp nhận mủ:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={report.water_level_area}
+                        onChangeText={text => handleInputChange('water_level_area', text)}
+                    />
+                </View>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Số xe:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={report.license_plate}
+                        onChangeText={text => handleInputChange('license_plate', text)}
+                    />
+                </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Tên báo cáo:</Text>
                     <TextInput

@@ -73,7 +73,7 @@ const EditData = ({ navigation, route }) => {
                 secondaryRubber: secondaryRubberData
             });
     
-            const response = await axios.post('http://192.168.1.7:3000/datereports/create', {
+            const response = await axios.post('http://192.168.1.33:3000/datereports/create', {
                 userId: reportData.userId,
                 waterLevelArea: waterLevelArea,
                 date: date.toISOString().split('T')[0],

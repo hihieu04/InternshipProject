@@ -73,7 +73,7 @@ const DateInput = ({ navigation, route }) => {
                 }
             };
 
-            const response = await axios.post('http://192.168.1.7:3000/datereports/create', reportData);
+            const response = await axios.post('http://192.168.1.33:3000/datereports/create', reportData);
 
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Báo cáo được tạo thành công!');

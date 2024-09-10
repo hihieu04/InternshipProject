@@ -15,7 +15,7 @@ const DateHistoryDetail = ({ navigation, route }) => {
 
     // Fetch dữ liệu khi component được mount
     useEffect(() => {
-        axios.get(`http://192.168.1.7:3000/history/datereports/${reportId}`)
+        axios.get(`http://192.168.1.33:3000/history/datereports/${reportId}`)
             .then(response => {
                 setReport(response.data.dateReport);
                 setMainRubber(response.data.mainRubber);
@@ -65,7 +65,7 @@ const DateHistoryDetail = ({ navigation, route }) => {
             const updatedMainRubber = { ...mainRubber };
             const updatedSecondaryRubber = { ...secondaryRubber };
 
-            const response = await axios.post('http://192.168.1.7:3000/history/datereports/update', {
+            const response = await axios.post('http://192.168.1.33:3000/history/datereports/update', {
                 dateReport: updatedReport,
                 mainRubber: updatedMainRubber,
                 secondaryRubber: updatedSecondaryRubber

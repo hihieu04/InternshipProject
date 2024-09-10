@@ -43,16 +43,13 @@ app.post('/login', async (req, res) => {
             const user = result.recordset[0];
             const hashedPassword = user.password;
 
-            // Kiểm tra tài khoản có bị vô hiệu hóa không
             if (!user.is_activity) {
                 return res.status(403).json({ message: 'Tài khoản đã bị khóa. Vui lòng liên hệ với chúng tôi!' });
             }
 
-            // So sánh mật khẩu người dùng nhập với mật khẩu đã mã hóa trong cơ sở dữ liệu
             const match = await bcrypt.compare(password, hashedPassword);
 
             if (match) {
-                // Nếu đăng nhập thành công, trả về thông tin người dùng
                 res.json({
                         user_id: user.user_id,
                         account_id: user.account_id,
@@ -64,11 +61,9 @@ app.post('/login', async (req, res) => {
                         date_created: user.date_created,
                 });
             } else {
-                // Nếu mật khẩu không khớp, đăng nhập thất bại
                 res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác!' });
             }
         } else {
-            // Không tìm thấy người dùng với tên đăng nhập này
             res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác!' });
         }
     } catch (err) {
@@ -141,23 +136,23 @@ app.post('/datereports/create', async (req, res) => {
         res.status(500).send('Error inserting data');
     }
 });
-app.post('/uploadReceptionReport', async (req, res) => {
-    const { user_id, name,waterLevelArea, date, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, image_name } = req.body;
+app.post('/receptionreports/create', async (req, res) => {
+    const { userId, name, waterLevelArea, date, licensePlate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, imageName } = req.body;
 
     try {
-        // Tạo một đối tượng SQL Request
         const receptionReportRequest = new sql.Request();
 
         // Câu truy vấn chèn dữ liệu vào bảng ReceptionReport
         const receptionReportQuery = `INSERT INTO ReceptionReport 
-                                      (user_id, name, water_level_area, date, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, image_name)
-                                      VALUES (@userId, @name, @waterLevelArea, @date, @creamLatexKg, @blockLatexKg, @sheetLatexKg, @frozenLatexKg, @cupLatexKg, @wireLatexKg, @totalHarvestLatexKg, @imageName)`;
+                                      (user_id, name, water_level_area, date, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, image_name)
+                                      VALUES (@userId, @name, @waterLevelArea, @date, @licensePlate, @creamLatexKg, @blockLatexKg, @sheetLatexKg, @frozenLatexKg, @cupLatexKg, @wireLatexKg, @totalHarvestLatexKg, @imageName)`;
 
         // Truyền các tham số vào câu truy vấn
-        receptionReportRequest.input('userId', sql.BigInt, user_id);
+        receptionReportRequest.input('userId', sql.BigInt, userId);
         receptionReportRequest.input('name', sql.VarChar, name);
         receptionReportRequest.input('waterLevelArea', sql.VarChar, waterLevelArea);
         receptionReportRequest.input('date', sql.Date, date);
+        receptionReportRequest.input('licensePlate', sql.VarChar, licensePlate);
         receptionReportRequest.input('creamLatexKg', sql.Float, cream_latex_kg);
         receptionReportRequest.input('blockLatexKg', sql.Float, block_latex_kg);
         receptionReportRequest.input('sheetLatexKg', sql.Float, sheet_latex_kg);
@@ -165,7 +160,7 @@ app.post('/uploadReceptionReport', async (req, res) => {
         receptionReportRequest.input('cupLatexKg', sql.Float, cup_latex_kg);
         receptionReportRequest.input('wireLatexKg', sql.Float, wire_latex_kg);
         receptionReportRequest.input('totalHarvestLatexKg', sql.Float, total_harvest_latex_kg);
-        receptionReportRequest.input('imageName', sql.VarChar, image_name);
+        receptionReportRequest.input('imageName', sql.VarChar, imageName);
 
         // Thực hiện câu truy vấn
         await receptionReportRequest.query(receptionReportQuery);
@@ -391,12 +386,14 @@ app.delete('/receptionreports/:reportId', async (req, res) => {
 
 // Sửa một ReceptionReport theo reception_report_id
 app.post('/history/receptionreports/update', async (req, res) => {
-    const { reception_report_id, name, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, date } = req.body;
+    const { reception_report_id, name, water_level_area, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, date } = req.body;
 
     try {
         const request = new sql.Request();
         request.input('reception_report_id', sql.Int, reception_report_id);
         request.input('name', sql.VarChar, name);
+        request.input('water_level_area', sql.VarChar, water_level_area);
+        request.input('license_plate', sql.VarChar, license_plate);
         request.input('cream_latex_kg', sql.Float, cream_latex_kg);
         request.input('block_latex_kg', sql.Float, block_latex_kg);
         request.input('sheet_latex_kg', sql.Float, sheet_latex_kg);
@@ -408,7 +405,7 @@ app.post('/history/receptionreports/update', async (req, res) => {
 
         const query = `
             UPDATE ReceptionReport
-            SET name = @name, cream_latex_kg = @cream_latex_kg, block_latex_kg = @block_latex_kg, 
+            SET name = @name, water_level_area = @water_level_area,license_plate = @license_plate, cream_latex_kg = @cream_latex_kg, block_latex_kg = @block_latex_kg, 
                 sheet_latex_kg = @sheet_latex_kg, frozen_latex_kg = @frozen_latex_kg, 
                 cup_latex_kg = @cup_latex_kg, wire_latex_kg = @wire_latex_kg, 
                 total_harvest_latex_kg = @total_harvest_latex_kg, date = @date

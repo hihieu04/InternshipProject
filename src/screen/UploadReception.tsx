@@ -26,6 +26,7 @@ function UploadReception({ navigation, route }) {
                 name: 'Bao cao 1',
                 waterLevelArea: 'Khu vực A',
                 date: new Date().toISOString().split('T')[0],
+                licensePlate: 'ABC-XYZ',
                 cream_latex_kg: 200.0,
                 block_latex_kg: 150.0,
                 sheet_latex_kg: 200.0,

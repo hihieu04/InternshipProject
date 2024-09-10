@@ -10,7 +10,7 @@ function DateHistory({ navigation, route }) {
     const [loading, setLoading] = useState(true); // Thêm state cho loading
 
     useEffect(() => {
-        axios.get(`http://192.168.1.7:3000/datereports`, {
+        axios.get(`http://192.168.1.33:3000/datereports`, {
             params: {
                 userId: userId 
             }
@@ -53,7 +53,7 @@ function DateHistory({ navigation, route }) {
     
 
     const deleteReport = (reportId) => {
-        axios.delete(`http://192.168.1.7:3000/datereports/${reportId}`)
+        axios.delete(`http://192.168.1.33:3000/datereports/${reportId}`)
             .then(() => {
                 // Cập nhật danh sách báo cáo sau khi xóa thành công
                 setReports(reports.filter(report => report.report_id !== reportId));
