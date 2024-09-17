@@ -1,31 +1,27 @@
+
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, ImageBackground, TextInput, TouchableOpacity, Dimensions, Alert } from 'react-native';
-
+import axios from "../api/axios";
 function Login({ navigation }): React.JSX.Element {
     const screenWidth = Dimensions.get('window').width;
     const [username, setUserName] = useState('');
     const [password, setPassword] = useState('');
     const [hidePass, setHidePass] = useState(true);
-
     const onPressHide = () => {
         setHidePass(!hidePass);
     }
     const LoginHandlerToManage = async () => {
         try {
-            const response = await fetch('http://192.168.1.33:3000/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password,
-                }),
+            const response = await axios.post('/login', {
+                username: username,
+                password: password,
             });
     
-            const result = await response.json();
+            // Xử lý phản hồi từ server
+            const result = response.data;
     
-            if (response.ok) {
+            if (response.status === 200) {
+                // Điều hướng đến trang Manage sau khi đăng nhập thành công
                 navigation.navigate('Manage', { 
                     user: result
                 });
@@ -34,7 +30,13 @@ function Login({ navigation }): React.JSX.Element {
             }
         } catch (error) {
             console.error('Error:', error);
-            Alert.alert('Error', 'Something went wrong. Please try again later.');
+            if (error.response) {
+                // Xử lý các lỗi từ phía server
+                Alert.alert('Login Failed', error.response.data.message || 'Invalid username or password');
+            } else {
+                // Xử lý lỗi liên quan đến mạng hoặc các vấn đề khác
+                Alert.alert('Error', 'Something went wrong. Please try again later.');
+            }
         }
     };
     // const LoginHandlerToManage = async () => {

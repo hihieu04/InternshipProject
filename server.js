@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 var config = {
     server: "HOANG-HIEU\\LAPTOPCUAHIEU",
-    database: "phien",
+    database: "MobileApp",
     driver: "msnodesqlv8",
     user: "sa",
     password: "04012003",
@@ -29,9 +29,9 @@ app.post('/login', async (req, res) => {
     try {
         const request = new sql.Request();
         const query = `
-            SELECT a.id AS account_id, a.password, a.is_activity, a.email, a.username, a.role_id, ui.firstname, ui.lastname, ui.date_created, ui.id as user_id
+            SELECT a.account_id AS account_id, a.password, a.is_activity, a.email, a.username, a.role_id, ui.firstname, ui.lastname, ui.date_created, ui.id as user_id
             FROM account a
-            INNER JOIN user_information ui ON a.id = ui.account_id
+            INNER JOIN user_information ui ON a.account_id = ui.account_id
             WHERE a.username = @username
         `;
 
@@ -43,7 +43,7 @@ app.post('/login', async (req, res) => {
             const user = result.recordset[0];
             const hashedPassword = user.password;
 
-            if (!user.is_activity) {
+            if (user.is_activity == 0) {
                 return res.status(403).json({ message: 'Tài khoản đã bị khóa. Vui lòng liên hệ với chúng tôi!' });
             }
 
@@ -71,10 +71,6 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Lỗi máy chủ nội bộ' });
     }
 });
-
-
-
-
 
 
 //EditData
