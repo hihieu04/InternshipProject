@@ -18,6 +18,8 @@ import EditData from './EditDataDate';
 import ReceptionInput from './ReceptionInput';
 import EditDataDate from './EditDataDate';
 import EditDataReception from './EditDataReception';
+import NamePersonList from './NamePersonList';
+import AreaListReception from './AreaListReception';
 // import DateReportManage from './DateReportManage';
 
 
@@ -47,6 +49,9 @@ function HomeManage({route}): React.JSX.Element {
         <Stack.Screen name="ReceptionInput" component={ReceptionInput}/>
         <Stack.Screen name="EditDataDate" component={EditDataDate}/>
         <Stack.Screen name="EditDataReception" component={EditDataReception}/>
+        <Stack.Screen name="NamePersonList" component={NamePersonList}/>
+        <Stack.Screen name="AreaListReception" component={AreaListReception}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );

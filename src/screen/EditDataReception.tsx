@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
 
 const EditDataReception = ({ navigation, route }) => {
-    const { user, reportData } = route.params;
+    const { user, reportData, onSave } = route.params;
 
-    // State quản lý dữ liệu của từng trường
-    const [name, setName] = useState(reportData.name || '');
     const [date, setDate] = useState(new Date(reportData.date));
     const [waterLevelArea, setWaterLevelArea] = useState(reportData.waterLevelArea);
     const [licensePlate, setLicensePlate] = useState(reportData.licensePlate);
@@ -18,7 +15,6 @@ const EditDataReception = ({ navigation, route }) => {
     const [cupLatexKg, setCupLatexKg] = useState(reportData.cup_latex_kg?.toString() || '');
     const [wireLatexKg, setWireLatexKg] = useState(reportData.wire_latex_kg?.toString() || '');
     const [totalHarvestLatexKg, setTotalHarvestLatexKg] = useState(reportData.total_harvest_latex_kg?.toString() || '');
-
     const [show, setShow] = useState(false);
 
     const onChange = (event, selectedDate) => {
@@ -26,42 +22,26 @@ const EditDataReception = ({ navigation, route }) => {
         setShow(false);
         setDate(currentDate);
     };
-
     const goBack = () => {
         navigation.goBack();
     };
+    const submitChanges = () => {
+        const updatedReportData = {
+            ...reportData,
+            waterLevelArea,
+            date: date.toISOString().split('T')[0],
+            licensePlate,
+            cream_latex_kg: parseFloat(creamLatexKg),
+            block_latex_kg: parseFloat(blockLatexKg),
+            sheet_latex_kg: parseFloat(sheetLatexKg),
+            frozen_latex_kg: parseFloat(frozenLatexKg),
+            cup_latex_kg: parseFloat(cupLatexKg),
+            wire_latex_kg: parseFloat(wireLatexKg),
+            total_harvest_latex_kg: parseFloat(totalHarvestLatexKg),
+        };
 
-    const submitReport = async () => {
-        try {
-            const reportDataToSend = {
-                userId: reportData.userId,
-                name: name,
-                waterLevelArea: waterLevelArea,
-                date: date.toISOString().split('T')[0],
-                licensePlate: licensePlate,
-                cream_latex_kg: parseFloat(creamLatexKg),
-                block_latex_kg: parseFloat(blockLatexKg),
-                sheet_latex_kg: parseFloat(sheetLatexKg),
-                frozen_latex_kg: parseFloat(frozenLatexKg),
-                cup_latex_kg: parseFloat(cupLatexKg),
-                wire_latex_kg: parseFloat(wireLatexKg),
-                total_harvest_latex_kg: parseFloat(totalHarvestLatexKg),
-                imageName: reportData.imageName
-            };
-
-            const response = await axios.post('http://192.168.1.33:3000/receptionreports/create', reportDataToSend);
-
-            if (response.status === 200) {
-                Alert.alert('Thành công', 'Báo cáo đã được gửi thành công!', [
-                    { text: 'OK', onPress: () => navigation.navigate('ReceptionReport', { user }) }
-                ]);
-            } else {
-                Alert.alert('Lỗi', 'Không thể gửi báo cáo. Vui lòng thử lại.');
-            }
-        } catch (error) {
-            console.error('Error submitting report:', error);
-            Alert.alert('Lỗi', 'Không thể kết nối với máy chủ. Vui lòng thử lại.');
-        }
+        onSave(updatedReportData);
+        navigation.goBack();  
     };
 
     return (
@@ -74,20 +54,12 @@ const EditDataReception = ({ navigation, route }) => {
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Chỉnh sửa báo cáo tiếp nhận</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={submitReport}>
+                <TouchableOpacity style={styles.button} onPress={submitChanges}>
                     <Text style={styles.buttonText}>Lưu</Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.formContainer}>
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Khu cạo (mủ nước):</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={waterLevelArea}
-                        onChangeText={setWaterLevelArea}
-                    />
-                </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Số xe:</Text>
                     <TextInput
@@ -96,7 +68,6 @@ const EditDataReception = ({ navigation, route }) => {
                         onChangeText={setLicensePlate}
                     />
                 </View>
-                {/* Ngày cạo */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Ngày cạo:</Text>
                     <TouchableOpacity onPress={() => setShow(true)}>
@@ -112,17 +83,7 @@ const EditDataReception = ({ navigation, route }) => {
                         />
                     )}
                 </View>
-                {/* Nội dung */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Tên báo cáo:</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={name}
-                        onChangeText={setName}
-                    />
-                </View>
 
-                {/* Mủ kem (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Mủ kem (kg):</Text>
                     <TextInput
@@ -133,7 +94,6 @@ const EditDataReception = ({ navigation, route }) => {
                     />
                 </View>
 
-                {/* Mủ khối (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Mủ khối (kg):</Text>
                     <TextInput
@@ -143,8 +103,6 @@ const EditDataReception = ({ navigation, route }) => {
                         keyboardType="numeric"
                     />
                 </View>
-
-                {/* Mủ tờ (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Mủ tờ (kg):</Text>
                     <TextInput
@@ -154,8 +112,6 @@ const EditDataReception = ({ navigation, route }) => {
                         keyboardType="numeric"
                     />
                 </View>
-
-                {/* Mủ đông (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Mủ đông (kg):</Text>
                     <TextInput
@@ -165,8 +121,6 @@ const EditDataReception = ({ navigation, route }) => {
                         keyboardType="numeric"
                     />
                 </View>
-
-                {/* Mủ chén (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Mủ chén (kg):</Text>
                     <TextInput
@@ -176,8 +130,6 @@ const EditDataReception = ({ navigation, route }) => {
                         keyboardType="numeric"
                     />
                 </View>
-
-                {/* Mủ dây (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Mủ dây (kg):</Text>
                     <TextInput
@@ -187,8 +139,6 @@ const EditDataReception = ({ navigation, route }) => {
                         keyboardType="numeric"
                     />
                 </View>
-
-                {/* Tổng tận thu (kg) */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Tổng tận thu (kg):</Text>
                     <TextInput

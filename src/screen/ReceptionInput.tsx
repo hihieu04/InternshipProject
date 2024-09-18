@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
+import axios from '../api/axios';
 
 const ReceptionInput = ({ navigation , route}) => {
     const {user} = route.params;
-    // State để quản lý dữ liệu nhập vào
-    const [name, setName] = useState('');
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [waterLevelArea, setWaterLevelArea] = useState('');
@@ -63,7 +61,6 @@ const ReceptionInput = ({ navigation , route}) => {
             const reportDataToSend = {
                 userId: user.user_id,
                 waterLevelArea: waterLevelArea,
-                name: name,
                 date: date.toISOString().split('T')[0],
                 licensePlate: licensePlate,
                 cream_latex_kg: ensureNumericValue(creamLatexKg),
@@ -76,7 +73,7 @@ const ReceptionInput = ({ navigation , route}) => {
                 imageName
             };
 
-            const response = await axios.post('http://192.168.1.33:3000/receptionreports/create', reportDataToSend);
+            const response = await axios.post('/receptionreports/createOneReport', reportDataToSend);
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Báo cáo được tạo thành công!');
                 navigation.goBack();
@@ -121,15 +118,7 @@ const ReceptionInput = ({ navigation , route}) => {
                         onChangeText={setLicensePlate}
                     />
                 </View>
-                {/* Tên báo cáo */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Tên báo cáo:</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={name}
-                        onChangeText={setName}
-                    />
-                </View>
+
 
                 {/* Ngày */}
                 <View style={styles.inputGroup}>

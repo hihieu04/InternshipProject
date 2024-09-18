@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
-import axios from 'axios';
+import axios from '../api/axios';
 import { COLORS } from '../theme/theme';
 
 function ReceptionHistory({ navigation, route }) {
@@ -10,28 +10,40 @@ function ReceptionHistory({ navigation, route }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://192.168.1.33:3000/receptionreports`, {
+        axios.get(`/receptionreports`, {
             params: {
                 userId: userId
             }
         })
-            .then(response => {
-                console.log('Reports fetched:', response.data);
-                setReports(response.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Error fetching reports:', error);
-                setLoading(false);
-                if (error.response) {
-                    Alert.alert('Error', `Unable to fetch reports. Server responded with status code ${error.response.status}`);
-                } else if (error.request) {
-                    Alert.alert('Error', 'Unable to fetch reports. No response from server.');
-                } else {
-                    Alert.alert('Error', `Unable to fetch reports. Error: ${error.message}`);
-                }
+        .then(response => {
+            console.log('Reports fetched:', response.data);
+    
+            const sortedReports = response.data.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+    
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
+    
+                return a.id - b.id; 
             });
+    
+            setReports(sortedReports);
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Error fetching reports:', error);
+            setLoading(false);
+            if (error.response) {
+                Alert.alert('Error', `Unable to fetch reports. Server responded with status code ${error.response.status}`);
+            } else if (error.request) {
+                Alert.alert('Error', 'Unable to fetch reports. No response from server.');
+            } else {
+                Alert.alert('Error', `Unable to fetch reports. Error: ${error.message}`);
+            }
+        });
     }, [userId]);
+    
 
     const handlePressToDetail = (report) => {
         navigation.navigate('ReceptionHistoryDetail', { user: user, reportId: report.reception_report_id });
@@ -49,7 +61,7 @@ function ReceptionHistory({ navigation, route }) {
     };
 
     const deleteReport = (reportId) => {
-        axios.delete(`http://192.168.1.33:3000/receptionreports/${reportId}`)
+        axios.delete(`/receptionreports/${reportId}`)
             .then(() => {
                 setReports(reports.filter(report => report.reception_report_id !== reportId));
                 Alert.alert('Thành công', 'Báo cáo đã được xóa.');
@@ -71,15 +83,11 @@ function ReceptionHistory({ navigation, route }) {
             <View style={styles.itemContainer}>
                  <TouchableOpacity onPress={() => handlePressToDetail(item)}>
                     <View style={styles.itemContent}>
-                        <Text style={styles.title}>{item.name}</Text>
-                        <Text style={styles.title}>ID: {item.reception_report_id}</Text>
+                        <Text style={styles.title}>{item.water_level_area}</Text>
                         <Text style={styles.date}>{formattedDate}</Text>
                     </View>
                 </TouchableOpacity>
                 <View style={styles.actions}>
-                    <TouchableOpacity onPress={() => navigation.navigate('EditReceptionReport', { report: item })}>
-                        <Text style={styles.editText}>Sửa</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDeleteReport(item.reception_report_id)}>
                         <Text style={styles.deleteText}>Xóa</Text>
                     </TouchableOpacity>
@@ -172,7 +180,7 @@ const styles = StyleSheet.create({
     },
     date: {
         fontSize: 14,
-        color: COLORS.primaryDarkGreyHex,
+        color: 'blue',
     },
     actions: {
         flexDirection: 'row',

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Switch, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
+import axios from '../api/axios';
 
 const DateInput = ({ navigation, route }) => {
     const { user } = route.params;
-
+    const [stt, setStt] = useState('');
+    const [namePerson, setNamePerson] = useState('');  
     const [date, setDate] = useState(new Date());
     const [show, setShow] = useState(false);
     const [isEnabled, setIsEnabled] = useState(false);
@@ -48,6 +49,8 @@ const DateInput = ({ navigation, route }) => {
         try {
             const reportData = {
                 userId: user.user_id,
+                stt: stt,  
+                name_person: namePerson,
                 waterLevelArea,
                 date: date.toISOString().split('T')[0],
                 attendancePoint: isEnabled,
@@ -72,8 +75,7 @@ const DateInput = ({ navigation, route }) => {
                     total_harvest_kg: totalHarvestKg === '' ? 0 : totalHarvestKg,
                 }
             };
-
-            const response = await axios.post('http://192.168.1.33:3000/datereports/create', reportData);
+            const response = await axios.post('/datereports/createOneReport', reportData);
 
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Báo cáo được tạo thành công!');
@@ -108,7 +110,23 @@ const DateInput = ({ navigation, route }) => {
             <Text style={styles.name}>{user.firstname} {user.lastname}</Text>
 
             <ScrollView contentContainerStyle={styles.formContainer}>
-                {/* DateReport fields */}
+            <View style={styles.inputGroup}>
+                    <Text style={styles.label}>STT:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={stt.toString()}
+                        onChangeText={setStt}
+                        keyboardType="numeric"
+                    />
+                </View>
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Tên người ghi nhận:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={namePerson}
+                        onChangeText={setNamePerson}
+                    />
+                </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Khu cạo (mủ nước):</Text>
                     <TextInput
@@ -158,7 +176,6 @@ const DateInput = ({ navigation, route }) => {
                         onChangeText={setConfirmSign}
                     />
                 </View>
-                {/* MainRubber fields */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>MỦ NƯỚC</Text>
                     <View style={styles.inputGroup}>
@@ -240,7 +257,6 @@ const DateInput = ({ navigation, route }) => {
                     </View>
                 </View>
 
-                {/* SecondaryRubber fields */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>MỦ PHỤ</Text>
                     <View style={styles.inputGroup}>

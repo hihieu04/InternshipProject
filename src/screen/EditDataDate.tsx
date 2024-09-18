@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Switch, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
 
 const EditData = ({ navigation, route }) => {
-    const { user, reportData } = route.params;
+    const { user, reportData, onSave } = route.params;  // Lấy thêm chỉ số và setData
     const [date, setDate] = useState(new Date(reportData.date));
     const [waterLevelArea, setWaterLevelArea] = useState(reportData.waterLevelArea);
     const [attendancePoint, setAttendancePoint] = useState(!!reportData.attendancePoint);
     const [personalEquipmentCheck, setPersonalEquipmentCheck] = useState(reportData.personalEquipmentCheck);
     const [confirmSign, setConfirmSign] = useState(reportData.confirmSign);
+    const [namePerson, setNamePerson] = useState(reportData.name_person);
+    const [stt, setSTT] = useState(reportData.stt);
     const [mainRubber, setMainRubber] = useState({
         lo_name: reportData.mainRubber.lo_name || '',
         nh3_liters: reportData.mainRubber.nh3_liters?.toString() || '',
@@ -40,62 +41,40 @@ const EditData = ({ navigation, route }) => {
         navigation.goBack();
     };
 
-    const submitReport = async () => {
-        try {
-            // Chuyển string -> float
-            const mainRubberData = {
-                ...mainRubber,
-                nh3_liters: parseFloat(mainRubber.nh3_liters),
-                first_batch_cream: parseFloat(mainRubber.first_batch_cream),
-                first_batch_block: parseFloat(mainRubber.first_batch_block),
-                first_batch_stove: parseFloat(mainRubber.first_batch_stove),
-                second_batch_block: parseFloat(mainRubber.second_batch_block),
-                second_batch_stove: parseFloat(mainRubber.second_batch_stove),
-                coagulated_latex: parseFloat(mainRubber.coagulated_latex)
-            };
-    
-            const secondaryRubberData = {
-                ...secondaryRubber,
-                frozen_kg: parseFloat(secondaryRubber.frozen_kg),
-                stew_kg: parseFloat(secondaryRubber.stew_kg),
-                wire_kg: parseFloat(secondaryRubber.wire_kg),
-                total_harvest_kg: parseFloat(secondaryRubber.total_harvest_kg)
-            };
-            console.log('Report Data:', {
-                userId: reportData.userId,
-                waterLevelArea: waterLevelArea,
-                date: date.toISOString().split('T')[0],
-                attendancePoint: attendancePoint ? 1 : 0,
-                personalEquipmentCheck: personalEquipmentCheck,
-                confirmSign: confirmSign,
-                imageName: reportData.imageName,
-                mainRubber: mainRubberData,
-                secondaryRubber: secondaryRubberData
-            });
-    
-            const response = await axios.post('http://192.168.1.33:3000/datereports/create', {
-                userId: reportData.userId,
-                waterLevelArea: waterLevelArea,
-                date: date.toISOString().split('T')[0],
-                attendancePoint: attendancePoint ? 1 : 0,
-                personalEquipmentCheck: personalEquipmentCheck,
-                confirmSign: confirmSign,
-                imageName: reportData.imageName,
-                mainRubber: mainRubberData,
-                secondaryRubber: secondaryRubberData
-            });
-    
-            if (response.status === 200) {
-                Alert.alert('Thành công', 'Báo cáo đã được gửi thành công!', [
-                    { text: 'OK', onPress: () => navigation.navigate('DateReport', {user}) }
-                ]);
-            } else {
-                Alert.alert('Lỗi', 'Không thể gửi báo cáo. Vui lòng thử lại.');
-            }
-        } catch (error) {
-            console.error('Error submitting report:', error);
-            Alert.alert('Lỗi', 'Không thể kết nối với máy chủ. Vui lòng thử lại.');
-        }
+    const saveChanges = () => {
+        const mainRubberData = {
+            ...mainRubber,
+            nh3_liters: parseFloat(mainRubber.nh3_liters),
+            first_batch_cream: parseFloat(mainRubber.first_batch_cream),
+            first_batch_block: parseFloat(mainRubber.first_batch_block),
+            first_batch_stove: parseFloat(mainRubber.first_batch_stove),
+            second_batch_block: parseFloat(mainRubber.second_batch_block),
+            second_batch_stove: parseFloat(mainRubber.second_batch_stove),
+            coagulated_latex: parseFloat(mainRubber.coagulated_latex)
+        };
+
+        const secondaryRubberData = {
+            ...secondaryRubber,
+            frozen_kg: parseFloat(secondaryRubber.frozen_kg),
+            stew_kg: parseFloat(secondaryRubber.stew_kg),
+            wire_kg: parseFloat(secondaryRubber.wire_kg),
+            total_harvest_kg: parseFloat(secondaryRubber.total_harvest_kg)
+        };
+
+        const updatedReportData = {
+            ...reportData,
+            waterLevelArea,
+            date: date.toISOString().split('T')[0],
+            attendancePoint: attendancePoint ? 1 : 0,
+            personalEquipmentCheck,
+            confirmSign,
+            name_person: namePerson,
+            stt,
+            mainRubber: mainRubberData,
+            secondaryRubber: secondaryRubberData
+        };
+        onSave(updatedReportData);
+        navigation.goBack();
     };
     
 
@@ -109,14 +88,13 @@ const EditData = ({ navigation, route }) => {
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Chỉnh sửa báo cáo</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={submitReport}>
+                <TouchableOpacity style={styles.button} onPress={saveChanges}>
                     <Text style={styles.buttonText}>Lưu</Text>
                 </TouchableOpacity>
             </View>
-            <Text style={styles.name}>NGUYỄN VĂN A</Text>
+            <Text style={styles.name}>{namePerson}</Text>
             
             <ScrollView contentContainerStyle={styles.formContainer}>
-                {/* Khu cạo */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Khu cạo (mủ nước):</Text>
                     <TextInput
@@ -125,8 +103,6 @@ const EditData = ({ navigation, route }) => {
                         onChangeText={setWaterLevelArea}
                     />
                 </View>
-                
-                {/* Ngày cạo */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Ngày cạo:</Text>
                     <TouchableOpacity onPress={() => setShow(true)}>
@@ -143,7 +119,6 @@ const EditData = ({ navigation, route }) => {
                     )}
                 </View>
 
-                {/* Điểm danh */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Điểm danh:</Text>
                     <Switch
@@ -154,8 +129,6 @@ const EditData = ({ navigation, route }) => {
                         onValueChange={setAttendancePoint}
                     />
                 </View>
-
-                {/* Kiểm tra dụng cụ cá nhân */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Kiểm tra dụng cụ cá nhân:</Text>
                     <TextInput
@@ -164,8 +137,6 @@ const EditData = ({ navigation, route }) => {
                         onChangeText={setPersonalEquipmentCheck}
                     />
                 </View>
-
-                {/* Mủ nước */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>MỦ NƯỚC</Text>
                     <View style={styles.inputGroup}>
@@ -239,8 +210,6 @@ const EditData = ({ navigation, route }) => {
                         />
                     </View>
                 </View>
-
-                {/* Mủ phụ */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>MỦ PHỤ</Text>
                     <View style={styles.inputGroup}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Switch, Alert, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
+import axios from '../api/axios';
 
 const DateHistoryDetail = ({ navigation, route }) => {
     const { user, reportId } = route.params;
@@ -14,7 +14,7 @@ const DateHistoryDetail = ({ navigation, route }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     useEffect(() => {
-        axios.get(`http://192.168.1.4:3000/history/datereports/${reportId}`)
+        axios.get(`/history/datereports/${reportId}`)
             .then(response => {
                 setReport(response.data.dateReport);
                 setMainRubber(response.data.mainRubber);
@@ -64,7 +64,7 @@ const DateHistoryDetail = ({ navigation, route }) => {
             const updatedMainRubber = { ...mainRubber };
             const updatedSecondaryRubber = { ...secondaryRubber };
 
-            const response = await axios.post('http://192.168.1.4:3000/history/datereports/update', {
+            const response = await axios.post('/history/datereports/update', {
                 dateReport: updatedReport,
                 mainRubber: updatedMainRubber,
                 secondaryRubber: updatedSecondaryRubber
@@ -72,7 +72,7 @@ const DateHistoryDetail = ({ navigation, route }) => {
 
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Báo cáo được cập nhật thành công!');
-                navigation.goBack();
+                navigation.navigate('DateReport', { user });
             } else {
                 Alert.alert('Lỗi', 'Thất bại.');
             }
@@ -100,10 +100,25 @@ const DateHistoryDetail = ({ navigation, route }) => {
                     <Text style={styles.buttonText}>Lưu</Text>
                 </TouchableOpacity>
             </View>
-            <Text style={styles.name}>{user.firstname} {user.lastname}</Text>
-
             <ScrollView contentContainerStyle={styles.formContainer}>
-                {/* Trường Khu cạo (mủ nước) */}
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>STT:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={report?.stt?.toString() || ''}
+                        onChangeText={text => handleInputChange('stt', text, 'report')}
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Tên người ghi nhận:</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={report?.name_person || ''}
+                        onChangeText={text => handleInputChange('name_person', text, 'report')}
+                    />
+                </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Khu cạo (mủ nước):</Text>
                     <TextInput
@@ -112,8 +127,6 @@ const DateHistoryDetail = ({ navigation, route }) => {
                         onChangeText={text => handleInputChange('water_level_area', text, 'report')}
                     />
                 </View>
-
-                {/* Ngày cạo */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Ngày cạo:</Text>
                     <TouchableOpacity onPress={() => setShowDatePicker(true)}>

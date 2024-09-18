@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axios from 'axios';
+import axios from '../api/axios';
 
 const ReceptionHistoryDetail = ({ navigation, route }) => {
     const { user, reportId } = route.params;
@@ -10,7 +10,7 @@ const ReceptionHistoryDetail = ({ navigation, route }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
 
     useEffect(() => {
-        axios.get(`http://192.168.1.33:3000/receptionreports/${reportId}`)
+        axios.get(`/receptionreports/${reportId}`)
             .then(response => {
                 setReport(response.data);
                 setLoading(false);
@@ -50,16 +50,16 @@ const ReceptionHistoryDetail = ({ navigation, route }) => {
                 total_harvest_latex_kg: parseFloat(report.total_harvest_latex_kg)
             };
 
-            const response = await axios.post('http://192.168.1.33:3000/history/receptionreports/update', updatedReport);
+            const response = await axios.post('/history/receptionreports/update', updatedReport);
             if (response.status === 200) {
-                Alert.alert('Success', 'Report updated successfully!');
-                navigation.goBack();
+                Alert.alert('Thành công', 'Báo cáo đã cập nhật thành công!');
+                navigation.navigate('ReceptionReport', {user});
             } else {
-                Alert.alert('Error', 'Failed to update the report. Please try again.');
+                Alert.alert('Lỗi', 'Thất bại.');
             }
         } catch (error) {
             console.error('Error updating report:', error);
-            Alert.alert('Error', 'Failed to update the report. Please try again.');
+            Alert.alert('Lỗi', 'Thất bại.');
         }
     };
 
@@ -100,16 +100,6 @@ const ReceptionHistoryDetail = ({ navigation, route }) => {
                         onChangeText={text => handleInputChange('license_plate', text)}
                     />
                 </View>
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Tên báo cáo:</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={report.name}
-                        onChangeText={text => handleInputChange('name', text)}
-                    />
-                </View>
-
-                {/* Ngày */}
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Ngày:</Text>
                     <TouchableOpacity onPress={() => setShowDatePicker(true)}>

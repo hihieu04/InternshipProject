@@ -51,14 +51,14 @@ app.post('/login', async (req, res) => {
 
             if (match) {
                 res.json({
-                        user_id: user.user_id,
-                        account_id: user.account_id,
-                        firstname: user.firstname,
-                        lastname: user.lastname,
-                        username: user.username,
-                        email: user.email,
-                        role_id: user.role_id,
-                        date_created: user.date_created,
+                    user_id: user.user_id,
+                    account_id: user.account_id,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    username: user.username,
+                    email: user.email,
+                    role_id: user.role_id,
+                    date_created: user.date_created,
                 });
             } else {
                 res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác!' });
@@ -75,21 +75,86 @@ app.post('/login', async (req, res) => {
 
 //EditData
 app.post('/datereports/create', async (req, res) => {
-    const { userId, waterLevelArea, date, attendancePoint, personalEquipmentCheck, confirmSign, imageName, mainRubber, secondaryRubber } = req.body;
+    const { reports } = req.body;
+
+    try {
+        for (const report of reports) {
+            const dateReportRequest = new sql.Request();
+            const dateReportQuery = `INSERT INTO DateReport (user_id, stt, name_person, water_level_area, date, attendance_point, personal_equipment_check, confirm_sign, image_name)
+                                 OUTPUT INSERTED.report_id
+                                 VALUES (@userId, @stt, @name_person, @waterLevelArea, @date, @attendancePoint, @personalEquipmentCheck, @confirmSign, @imageName)`;
+
+            dateReportRequest.input('userId', sql.BigInt, report.userId);
+            dateReportRequest.input('stt', sql.BigInt, report.stt);
+            dateReportRequest.input('name_person', sql.VarChar, report.name_person);
+            dateReportRequest.input('waterLevelArea', sql.VarChar, report.waterLevelArea);
+            dateReportRequest.input('date', sql.Date, report.date);
+            dateReportRequest.input('attendancePoint', sql.Bit, report.attendancePoint);
+            dateReportRequest.input('personalEquipmentCheck', sql.VarChar, report.personalEquipmentCheck);
+            dateReportRequest.input('confirmSign', sql.VarChar, report.confirmSign);
+            dateReportRequest.input('imageName', sql.VarChar, report.imageName);
+
+            const dateReportResult = await dateReportRequest.query(dateReportQuery);
+            const reportId = dateReportResult.recordset[0].report_id;
+            console.log('Generated reportId:', reportId);
+
+            const mainRubberRequest = new sql.Request();
+            const mainRubberQuery = `INSERT INTO MainRubber 
+                         (report_id, lo_name, nh3_liters, first_batch_cream, first_batch_block, first_batch_stove, second_batch_block, second_batch_stove, coagulated_latex)
+                         VALUES (@reportId, @loName, @nh3Liters, @firstBatchCream, @firstBatchBlock, @firstBatchStove, @secondBatchBlock, @secondBatchStove, @coagulatedLatex)`;
+
+            mainRubberRequest.input('reportId', sql.Int, reportId);
+            mainRubberRequest.input('loName', sql.VarChar, report.mainRubber.lo_name);
+            mainRubberRequest.input('nh3Liters', sql.Float, report.mainRubber.nh3_liters);
+            mainRubberRequest.input('firstBatchCream', sql.Float, report.mainRubber.first_batch_cream);
+            mainRubberRequest.input('firstBatchBlock', sql.Float, report.mainRubber.first_batch_block);
+            mainRubberRequest.input('firstBatchStove', sql.Float, report.mainRubber.first_batch_stove);
+            mainRubberRequest.input('secondBatchBlock', sql.Float, report.mainRubber.second_batch_block);
+            mainRubberRequest.input('secondBatchStove', sql.Float, report.mainRubber.second_batch_stove);
+            mainRubberRequest.input('coagulatedLatex', sql.Float, report.mainRubber.coagulated_latex);
+
+            await mainRubberRequest.query(mainRubberQuery);
+
+            const secondaryRubberRequest = new sql.Request();
+            const secondaryRubberQuery = `INSERT INTO SecondaryRubber 
+                              (report_id, lo_name, frozen_kg, stew_kg, wire_kg, total_harvest_kg)
+                              VALUES (@reportId, @loName, @frozenKg, @stewKg, @wireKg, @totalHarvestKg)`;
+
+            secondaryRubberRequest.input('reportId', sql.Int, reportId);
+            secondaryRubberRequest.input('loName', sql.VarChar, report.secondaryRubber.lo_name);
+            secondaryRubberRequest.input('frozenKg', sql.Float, report.secondaryRubber.frozen_kg);
+            secondaryRubberRequest.input('stewKg', sql.Float, report.secondaryRubber.stew_kg);
+            secondaryRubberRequest.input('wireKg', sql.Float, report.secondaryRubber.wire_kg);
+            secondaryRubberRequest.input('totalHarvestKg', sql.Float, report.secondaryRubber.total_harvest_kg);
+
+            await secondaryRubberRequest.query(secondaryRubberQuery);
+
+            res.status(200).send('Report and related data inserted successfully');
+        }
+    } catch (err) {
+        console.error('Error inserting data:', err);
+        res.status(500).send('Error inserting data');
+    }
+});
+
+app.post('/datereports/createOneReport', async (req, res) => {
+    const report = req.body;
 
     try {
         const dateReportRequest = new sql.Request();
-        const dateReportQuery = `INSERT INTO DateReport (user_id, water_level_area, date, attendance_point, personal_equipment_check, confirm_sign, image_name)
+        const dateReportQuery = `INSERT INTO DateReport (user_id, stt, name_person, water_level_area, date, attendance_point, personal_equipment_check, confirm_sign, image_name)
                                  OUTPUT INSERTED.report_id
-                                 VALUES (@userId, @waterLevelArea, @date, @attendancePoint, @personalEquipmentCheck, @confirmSign, @imageName)`;
+                                 VALUES (@userId, @stt, @name_person, @waterLevelArea, @date, @attendancePoint, @personalEquipmentCheck, @confirmSign, @imageName)`;
 
-        dateReportRequest.input('userId', sql.BigInt, userId);
-        dateReportRequest.input('waterLevelArea', sql.VarChar, waterLevelArea);
-        dateReportRequest.input('date', sql.Date, date);
-        dateReportRequest.input('attendancePoint', sql.Bit, attendancePoint);
-        dateReportRequest.input('personalEquipmentCheck', sql.VarChar, personalEquipmentCheck);
-        dateReportRequest.input('confirmSign', sql.VarChar, confirmSign);
-        dateReportRequest.input('imageName', sql.VarChar, imageName);
+        dateReportRequest.input('userId', sql.BigInt, report.userId);
+        dateReportRequest.input('stt', sql.BigInt, report.stt);
+        dateReportRequest.input('name_person', sql.VarChar, report.name_person);
+        dateReportRequest.input('waterLevelArea', sql.VarChar, report.waterLevelArea);
+        dateReportRequest.input('date', sql.Date, report.date);
+        dateReportRequest.input('attendancePoint', sql.Bit, report.attendancePoint);
+        dateReportRequest.input('personalEquipmentCheck', sql.VarChar, report.personalEquipmentCheck);
+        dateReportRequest.input('confirmSign', sql.VarChar, report.confirmSign);
+        dateReportRequest.input('imageName', sql.VarChar, report.imageName);
 
         const dateReportResult = await dateReportRequest.query(dateReportQuery);
         const reportId = dateReportResult.recordset[0].report_id;
@@ -101,14 +166,14 @@ app.post('/datereports/create', async (req, res) => {
                          VALUES (@reportId, @loName, @nh3Liters, @firstBatchCream, @firstBatchBlock, @firstBatchStove, @secondBatchBlock, @secondBatchStove, @coagulatedLatex)`;
 
         mainRubberRequest.input('reportId', sql.Int, reportId);
-        mainRubberRequest.input('loName', sql.VarChar, mainRubber.lo_name);
-        mainRubberRequest.input('nh3Liters', sql.Float, mainRubber.nh3_liters);
-        mainRubberRequest.input('firstBatchCream', sql.Float, mainRubber.first_batch_cream);
-        mainRubberRequest.input('firstBatchBlock', sql.Float, mainRubber.first_batch_block);
-        mainRubberRequest.input('firstBatchStove', sql.Float, mainRubber.first_batch_stove);
-        mainRubberRequest.input('secondBatchBlock', sql.Float, mainRubber.second_batch_block);
-        mainRubberRequest.input('secondBatchStove', sql.Float, mainRubber.second_batch_stove);
-        mainRubberRequest.input('coagulatedLatex', sql.Float, mainRubber.coagulated_latex);
+        mainRubberRequest.input('loName', sql.VarChar, report.mainRubber.lo_name);
+        mainRubberRequest.input('nh3Liters', sql.Float, report.mainRubber.nh3_liters);
+        mainRubberRequest.input('firstBatchCream', sql.Float, report.mainRubber.first_batch_cream);
+        mainRubberRequest.input('firstBatchBlock', sql.Float, report.mainRubber.first_batch_block);
+        mainRubberRequest.input('firstBatchStove', sql.Float, report.mainRubber.first_batch_stove);
+        mainRubberRequest.input('secondBatchBlock', sql.Float, report.mainRubber.second_batch_block);
+        mainRubberRequest.input('secondBatchStove', sql.Float, report.mainRubber.second_batch_stove);
+        mainRubberRequest.input('coagulatedLatex', sql.Float, report.mainRubber.coagulated_latex);
 
         await mainRubberRequest.query(mainRubberQuery);
 
@@ -118,11 +183,11 @@ app.post('/datereports/create', async (req, res) => {
                               VALUES (@reportId, @loName, @frozenKg, @stewKg, @wireKg, @totalHarvestKg)`;
 
         secondaryRubberRequest.input('reportId', sql.Int, reportId);
-        secondaryRubberRequest.input('loName', sql.VarChar, secondaryRubber.lo_name);
-        secondaryRubberRequest.input('frozenKg', sql.Float, secondaryRubber.frozen_kg);
-        secondaryRubberRequest.input('stewKg', sql.Float, secondaryRubber.stew_kg);
-        secondaryRubberRequest.input('wireKg', sql.Float, secondaryRubber.wire_kg);
-        secondaryRubberRequest.input('totalHarvestKg', sql.Float, secondaryRubber.total_harvest_kg);
+        secondaryRubberRequest.input('loName', sql.VarChar, report.secondaryRubber.lo_name);
+        secondaryRubberRequest.input('frozenKg', sql.Float, report.secondaryRubber.frozen_kg);
+        secondaryRubberRequest.input('stewKg', sql.Float, report.secondaryRubber.stew_kg);
+        secondaryRubberRequest.input('wireKg', sql.Float, report.secondaryRubber.wire_kg);
+        secondaryRubberRequest.input('totalHarvestKg', sql.Float, report.secondaryRubber.total_harvest_kg);
 
         await secondaryRubberRequest.query(secondaryRubberQuery);
 
@@ -132,33 +197,64 @@ app.post('/datereports/create', async (req, res) => {
         res.status(500).send('Error inserting data');
     }
 });
+
 app.post('/receptionreports/create', async (req, res) => {
-    const { userId, name, waterLevelArea, date, licensePlate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, imageName } = req.body;
+    const { reports } = req.body;
+
+    try {
+        for (const report of reports) {
+            const receptionReportRequest = new sql.Request();
+
+            const receptionReportQuery = `INSERT INTO ReceptionReport 
+                                      (user_id, water_level_area, date, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, image_name)
+                                      VALUES (@userId, @waterLevelArea, @date, @licensePlate, @creamLatexKg, @blockLatexKg, @sheetLatexKg, @frozenLatexKg, @cupLatexKg, @wireLatexKg, @totalHarvestLatexKg, @imageName)`;
+
+            receptionReportRequest.input('userId', sql.BigInt, report.userId);
+            receptionReportRequest.input('waterLevelArea', sql.VarChar, report.waterLevelArea);
+            receptionReportRequest.input('date', sql.Date, report.date);
+            receptionReportRequest.input('licensePlate', sql.VarChar, report.licensePlate);
+            receptionReportRequest.input('creamLatexKg', sql.Float, report.cream_latex_kg);
+            receptionReportRequest.input('blockLatexKg', sql.Float, report.block_latex_kg);
+            receptionReportRequest.input('sheetLatexKg', sql.Float, report.sheet_latex_kg);
+            receptionReportRequest.input('frozenLatexKg', sql.Float, report.frozen_latex_kg);
+            receptionReportRequest.input('cupLatexKg', sql.Float, report.cup_latex_kg);
+            receptionReportRequest.input('wireLatexKg', sql.Float, report.wire_latex_kg);
+            receptionReportRequest.input('totalHarvestLatexKg', sql.Float, report.total_harvest_latex_kg);
+            receptionReportRequest.input('imageName', sql.VarChar, report.imageName);
+
+            await receptionReportRequest.query(receptionReportQuery);
+
+            res.status(200).send('Reception report data inserted successfully');
+        }
+    } catch (err) {
+        console.error('Error inserting data:', err);
+        res.status(500).send('Error inserting data');
+    }
+});
+
+app.post('/receptionreports/createOneReport', async (req, res) => {
+    const report = req.body;
 
     try {
         const receptionReportRequest = new sql.Request();
 
-        // Câu truy vấn chèn dữ liệu vào bảng ReceptionReport
         const receptionReportQuery = `INSERT INTO ReceptionReport 
-                                      (user_id, name, water_level_area, date, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, image_name)
-                                      VALUES (@userId, @name, @waterLevelArea, @date, @licensePlate, @creamLatexKg, @blockLatexKg, @sheetLatexKg, @frozenLatexKg, @cupLatexKg, @wireLatexKg, @totalHarvestLatexKg, @imageName)`;
+                                      (user_id,  water_level_area, date, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, image_name)
+                                      VALUES (@userId, @waterLevelArea, @date, @licensePlate, @creamLatexKg, @blockLatexKg, @sheetLatexKg, @frozenLatexKg, @cupLatexKg, @wireLatexKg, @totalHarvestLatexKg, @imageName)`;
 
-        // Truyền các tham số vào câu truy vấn
-        receptionReportRequest.input('userId', sql.BigInt, userId);
-        receptionReportRequest.input('name', sql.VarChar, name);
-        receptionReportRequest.input('waterLevelArea', sql.VarChar, waterLevelArea);
-        receptionReportRequest.input('date', sql.Date, date);
-        receptionReportRequest.input('licensePlate', sql.VarChar, licensePlate);
-        receptionReportRequest.input('creamLatexKg', sql.Float, cream_latex_kg);
-        receptionReportRequest.input('blockLatexKg', sql.Float, block_latex_kg);
-        receptionReportRequest.input('sheetLatexKg', sql.Float, sheet_latex_kg);
-        receptionReportRequest.input('frozenLatexKg', sql.Float, frozen_latex_kg);
-        receptionReportRequest.input('cupLatexKg', sql.Float, cup_latex_kg);
-        receptionReportRequest.input('wireLatexKg', sql.Float, wire_latex_kg);
-        receptionReportRequest.input('totalHarvestLatexKg', sql.Float, total_harvest_latex_kg);
-        receptionReportRequest.input('imageName', sql.VarChar, imageName);
+        receptionReportRequest.input('userId', sql.BigInt, report.userId);
+        receptionReportRequest.input('waterLevelArea', sql.VarChar, report.waterLevelArea);
+        receptionReportRequest.input('date', sql.Date, report.date);
+        receptionReportRequest.input('licensePlate', sql.VarChar, report.licensePlate);
+        receptionReportRequest.input('creamLatexKg', sql.Float, report.cream_latex_kg);
+        receptionReportRequest.input('blockLatexKg', sql.Float, report.block_latex_kg);
+        receptionReportRequest.input('sheetLatexKg', sql.Float, report.sheet_latex_kg);
+        receptionReportRequest.input('frozenLatexKg', sql.Float, report.frozen_latex_kg);
+        receptionReportRequest.input('cupLatexKg', sql.Float, report.cup_latex_kg);
+        receptionReportRequest.input('wireLatexKg', sql.Float, report.wire_latex_kg);
+        receptionReportRequest.input('totalHarvestLatexKg', sql.Float, report.total_harvest_latex_kg);
+        receptionReportRequest.input('imageName', sql.VarChar, report.imageName);
 
-        // Thực hiện câu truy vấn
         await receptionReportRequest.query(receptionReportQuery);
 
         res.status(200).send('Reception report data inserted successfully');
@@ -167,8 +263,6 @@ app.post('/receptionreports/create', async (req, res) => {
         res.status(500).send('Error inserting data');
     }
 });
-
-
 //DateHistory
 app.get('/datereports', (req, res) => {
     const userId = req.query.userId;
@@ -238,7 +332,6 @@ app.get('/history/datereports/:reportId', async (req, res) => {
     try {
         const request = new sql.Request();
 
-        // Lấy dữ liệu từ DateReport
         const dateReportQuery = `SELECT * FROM DateReport WHERE report_id = @reportId`;
         request.input('reportId', sql.Int, reportId);
         const dateReportResult = await request.query(dateReportQuery);
@@ -248,12 +341,10 @@ app.get('/history/datereports/:reportId', async (req, res) => {
             return res.status(404).send({ message: 'Report not found' });
         }
 
-        // Lấy dữ liệu từ MainRubber
         const mainRubberQuery = `SELECT * FROM MainRubber WHERE report_id = @reportId`;
         const mainRubberResult = await request.query(mainRubberQuery);
         const mainRubber = mainRubberResult.recordset[0];
 
-        // Lấy dữ liệu từ SecondaryRubber
         const secondaryRubberQuery = `SELECT * FROM SecondaryRubber WHERE report_id = @reportId`;
         const secondaryRubberResult = await request.query(secondaryRubberQuery);
         const secondaryRubber = secondaryRubberResult.recordset[0];
@@ -270,7 +361,6 @@ app.get('/history/datereports/:reportId', async (req, res) => {
 });
 
 
-// API để cập nhật thông tin báo cáo
 app.post('/history/datereports/update', async (req, res) => {
     const { dateReport, mainRubber, secondaryRubber } = req.body;
     const reportId = dateReport.report_id;
@@ -279,15 +369,18 @@ app.post('/history/datereports/update', async (req, res) => {
         const request = new sql.Request();
 
         request.input('reportId', sql.Int, reportId);
+        request.input('stt', sql.BigInt, dateReport.stt);
+        request.input('name_person', sql.VarChar, dateReport.name_person);
         request.input('water_level_area', sql.VarChar, dateReport.water_level_area);
         request.input('date', sql.Date, new Date(dateReport.date));
         request.input('attendance_point', sql.Bit, dateReport.attendance_point);
         request.input('personal_equipment_check', sql.VarChar, dateReport.personal_equipment_check);
 
-        // Update DateReport
         await request.query(`
             UPDATE DateReport
             SET 
+                stt = @stt,
+                name_person = @name_person,
                 water_level_area = @water_level_area,
                 date = @date,
                 attendance_point = @attendance_point,
@@ -295,7 +388,6 @@ app.post('/history/datereports/update', async (req, res) => {
             WHERE report_id = @reportId
         `);
 
-        // Update MainRubber
         const mainRubberRequest = new sql.Request();
         mainRubberRequest.input('reportId', sql.Int, reportId);
         mainRubberRequest.input('lo_name', sql.VarChar, mainRubber.lo_name);
@@ -321,7 +413,6 @@ app.post('/history/datereports/update', async (req, res) => {
             WHERE report_id = @reportId
         `);
 
-        // Update SecondaryRubber
         const secondaryRubberRequest = new sql.Request();
         secondaryRubberRequest.input('reportId', sql.Int, reportId);
         secondaryRubberRequest.input('lo_name', sql.VarChar, secondaryRubber.lo_name);
@@ -382,12 +473,11 @@ app.delete('/receptionreports/:reportId', async (req, res) => {
 
 // Sửa một ReceptionReport theo reception_report_id
 app.post('/history/receptionreports/update', async (req, res) => {
-    const { reception_report_id, name, water_level_area, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, date } = req.body;
+    const { reception_report_id,water_level_area, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, date } = req.body;
 
     try {
         const request = new sql.Request();
         request.input('reception_report_id', sql.Int, reception_report_id);
-        request.input('name', sql.VarChar, name);
         request.input('water_level_area', sql.VarChar, water_level_area);
         request.input('license_plate', sql.VarChar, license_plate);
         request.input('cream_latex_kg', sql.Float, cream_latex_kg);
@@ -401,13 +491,13 @@ app.post('/history/receptionreports/update', async (req, res) => {
 
         const query = `
             UPDATE ReceptionReport
-            SET name = @name, water_level_area = @water_level_area,license_plate = @license_plate, cream_latex_kg = @cream_latex_kg, block_latex_kg = @block_latex_kg, 
+            SET water_level_area = @water_level_area,license_plate = @license_plate, cream_latex_kg = @cream_latex_kg, block_latex_kg = @block_latex_kg, 
                 sheet_latex_kg = @sheet_latex_kg, frozen_latex_kg = @frozen_latex_kg, 
                 cup_latex_kg = @cup_latex_kg, wire_latex_kg = @wire_latex_kg, 
                 total_harvest_latex_kg = @total_harvest_latex_kg, date = @date
             WHERE reception_report_id = @reception_report_id
         `;
-        
+
         await request.query(query);
         res.status(200).json({ message: 'Report updated successfully' });
     } catch (err) {
@@ -424,7 +514,7 @@ app.get('/receptionreports/:reportId', async (req, res) => {
         const request = new sql.Request();
         request.input('reportId', sql.Int, reportId);
         const result = await request.query(`SELECT * FROM ReceptionReport WHERE reception_report_id = @reportId`);
-        
+
         if (result.recordset.length > 0) {
             res.status(200).json(result.recordset[0]);
         } else {

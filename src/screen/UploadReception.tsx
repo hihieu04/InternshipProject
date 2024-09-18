@@ -22,21 +22,36 @@ function UploadReception({ navigation, route }) {
         if (selectedImage) {
             const fileName = selectedImage.split('/').pop(); // Lấy tên file từ đường dẫn
             const reportData = {
-                userId: user.user_id,
-                name: 'Bao cao 1',
-                waterLevelArea: 'Khu vực A',
-                date: new Date().toISOString().split('T')[0],
-                licensePlate: 'ABC-XYZ',
-                cream_latex_kg: 200.0,
-                block_latex_kg: 150.0,
-                sheet_latex_kg: 200.0,
-                frozen_latex_kg: 50.0,
-                cup_latex_kg: 30.0,
-                wire_latex_kg: 20.0,
-                total_harvest_latex_kg: 450.0,
-                imageName: fileName,
+                report1: {
+                    userId: user.user_id,
+                    waterLevelArea: 'Khu vực A',
+                    date: new Date().toISOString().split('T')[0],
+                    licensePlate: 'ABC-XYZ',
+                    cream_latex_kg: 200.0,
+                    block_latex_kg: 150.0,
+                    sheet_latex_kg: 200.0,
+                    frozen_latex_kg: 50.0,
+                    cup_latex_kg: 30.0,
+                    wire_latex_kg: 20.0,
+                    total_harvest_latex_kg: 450.0,
+                    imageName: fileName,
+                },
+                report2: {
+                    userId: user.user_id,
+                    waterLevelArea: 'Khu vực B',
+                    date: new Date().toISOString().split('T')[0],
+                    licensePlate: 'ABC-XYZ',
+                    cream_latex_kg: 200.0,
+                    block_latex_kg: 150.0,
+                    sheet_latex_kg: 200.0,
+                    frozen_latex_kg: 50.0,
+                    cup_latex_kg: 30.0,
+                    wire_latex_kg: 20.0,
+                    total_harvest_latex_kg: 450.0,
+                    imageName: fileName,
+                }
             };
-            navigation.navigate('EditDataReception', { user, reportData });
+            navigation.navigate('AreaListReception', { user, reportData });
         } else {
             Alert.alert('Vui lòng chọn ảnh trước khi nộp báo cáo.');
         }
