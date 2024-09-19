@@ -129,8 +129,9 @@ app.post('/datereports/create', async (req, res) => {
 
             await secondaryRubberRequest.query(secondaryRubberQuery);
 
-            res.status(200).send('Report and related data inserted successfully');
+            
         }
+        res.status(200).send('Reception report data inserted successfully');
     } catch (err) {
         console.error('Error inserting data:', err);
         res.status(500).send('Error inserting data');
@@ -223,9 +224,8 @@ app.post('/receptionreports/create', async (req, res) => {
             receptionReportRequest.input('imageName', sql.VarChar, report.imageName);
 
             await receptionReportRequest.query(receptionReportQuery);
-
-            res.status(200).send('Reception report data inserted successfully');
         }
+        res.status(200).send('Reception report data inserted successfully');
     } catch (err) {
         console.error('Error inserting data:', err);
         res.status(500).send('Error inserting data');

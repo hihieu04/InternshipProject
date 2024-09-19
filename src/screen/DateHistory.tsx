@@ -109,7 +109,7 @@ function DateHistory({ navigation, route }) {
                         <TouchableOpacity onPress={() => navigation.goBack()}>
                             <Image source={require('../images/back.png')} style={styles.icon} />
                         </TouchableOpacity>
-                        <Text style={styles.textInHeader}>Lịch sử báo cáo tiếp nhận</Text>
+                        <Text style={styles.textInHeader}>Lịch sử báo cáo mủ ngày</Text>
                     </View>
                 </View>
                 <View style={styles.emptyContainer}>

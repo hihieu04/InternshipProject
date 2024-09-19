@@ -35,7 +35,7 @@ const NamePersonList = ({ navigation, route }) => {
 
             if (response.status === 200) {
                 Alert.alert('Thành công', 'Tất cả báo cáo đã được gửi thành công!', [
-                    { text: 'OK', onPress: () => navigation.navigate('ReceptionReport', { user }) }
+                    { text: 'OK', onPress: () => navigation.navigate('DateReport', { user }) }
                 ]);
             } else {
                 Alert.alert('Lỗi', 'Không thể gửi báo cáo. Vui lòng thử lại.');
