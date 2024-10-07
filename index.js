@@ -20,4 +20,5 @@ import UploadReception from './src/screen/UploadReception';
 import HomeManage from './src/screen/HomeManage';
 import Login from './src/screen/Login';
 import NavigatorLogin from './src/screen/NavigatorLogin';
+import NamePersonList from './src/screen/NamePersonList';
 AppRegistry.registerComponent(appName, () => NavigatorLogin);

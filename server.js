@@ -7,15 +7,16 @@ const app = express();
 app.use(bodyParser.json());
 
 var config = {
-    server: "HOANG-HIEU\\LAPTOPCUAHIEU",
+    server: ".",
     database: "MobileApp",
     driver: "msnodesqlv8",
     user: "sa",
-    password: "04012003",
+    password: "minhhoang",
     options: {
         trustedConnection: false
     }
 };
+
 
 sql.connect(config, function (err) {
     if (err) console.log(err);
@@ -75,7 +76,7 @@ app.post('/login', async (req, res) => {
 
 //EditData
 app.post('/datereports/create', async (req, res) => {
-    const { reports } = req.body;
+    const { reports } = req.body; // Lấy mảng báo cáo từ request body
 
     try {
         for (const report of reports) {
@@ -98,6 +99,7 @@ app.post('/datereports/create', async (req, res) => {
             const reportId = dateReportResult.recordset[0].report_id;
             console.log('Generated reportId:', reportId);
 
+            // Xử lý dữ liệu cho bảng MainRubber
             const mainRubberRequest = new sql.Request();
             const mainRubberQuery = `INSERT INTO MainRubber 
                          (report_id, lo_name, nh3_liters, first_batch_cream, first_batch_block, first_batch_stove, second_batch_block, second_batch_stove, coagulated_latex)
@@ -115,6 +117,7 @@ app.post('/datereports/create', async (req, res) => {
 
             await mainRubberRequest.query(mainRubberQuery);
 
+            // Xử lý dữ liệu cho bảng SecondaryRubber
             const secondaryRubberRequest = new sql.Request();
             const secondaryRubberQuery = `INSERT INTO SecondaryRubber 
                               (report_id, lo_name, frozen_kg, stew_kg, wire_kg, total_harvest_kg)
@@ -128,8 +131,6 @@ app.post('/datereports/create', async (req, res) => {
             secondaryRubberRequest.input('totalHarvestKg', sql.Float, report.secondaryRubber.total_harvest_kg);
 
             await secondaryRubberRequest.query(secondaryRubberQuery);
-
-            
         }
         res.status(200).send('Reception report data inserted successfully');
     } catch (err) {
@@ -137,6 +138,7 @@ app.post('/datereports/create', async (req, res) => {
         res.status(500).send('Error inserting data');
     }
 });
+
 
 app.post('/datereports/createOneReport', async (req, res) => {
     const report = req.body;
