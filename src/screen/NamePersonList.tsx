@@ -13,7 +13,7 @@ const NamePersonList = ({ navigation, route }) => {
             onPress={() => navigation.navigate('EditDataDate', {
                 user,
                 reportData: item,
-                onSave: handleSaveChanges // Hàm xử lý khi lưu báo cáo
+                onSave: handleSaveChanges 
             })}
         >
             <Text style={styles.name}>{item.name_person}</Text>

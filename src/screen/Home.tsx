@@ -4,7 +4,7 @@ import { COLORS } from '../theme/theme';
 
 function Home({ navigation, route }): React.JSX.Element {
   const {user, goBack} = route.params;
-  console.log(route.params); // Kiểm tra xem `user` và `goBack` có tồn tại hay không
+  console.log(route.params);
   const handleToDateReport = () => {
     navigation.navigate('DateReport',{user: user} )
   }

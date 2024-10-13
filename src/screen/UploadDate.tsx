@@ -6,9 +6,8 @@ import axios from 'axios';
 function UploadDate({ navigation, route }) {
     const { user } = route.params;
     const [selectedImage, setSelectedImage] = useState(null);
-    const [jsonData, setJsonData] = useState(null); // Dữ liệu JSON sẽ được lưu ở đây
+    const [jsonData, setJsonData] = useState(null);
 
-    // Hàm chọn ảnh
     const selectImage = () => {
         launchImageLibrary({ mediaType: 'photo' }, (response) => {
             if (response.didCancel) {
@@ -21,7 +20,6 @@ function UploadDate({ navigation, route }) {
         });
     };
 
-    // Gọi API để nhận dữ liệu JSON từ mô hình
     const fetchJsonDataFromApi = async () => {
         if (!selectedImage) {
             Alert.alert('Vui lòng chọn ảnh trước khi nộp báo cáo.');
@@ -36,12 +34,11 @@ function UploadDate({ navigation, route }) {
                 name: 'photo.jpg',
             });
 
-            // Gửi yêu cầu POST tới API
             const response = await axios.post('https://6add-34-168-181-254.ngrok-free.app/uploadfile/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            setJsonData(response.data.result); // Lưu dữ liệu JSON vào state (chỉ lấy phần result)
+            setJsonData(response.data.result); 
             console.log('Phản hồi từ API:', response.data.result);
         } catch (error) {
             console.error('Lỗi API:', error);
@@ -49,74 +46,68 @@ function UploadDate({ navigation, route }) {
         }
     };
 
-    // Lấy ngày hiện tại và định dạng thành chuỗi 'YYYY-MM-DD'
     const getCurrentDate = () => {
         const today = new Date();
         const year = today.getFullYear();
-        const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Tháng bắt đầu từ 0
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
         const day = today.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
 
-    // Hàm nộp báo cáo
     const submitReport = async () => {
-        await fetchJsonDataFromApi(); // Gọi API để lấy dữ liệu JSON
+        await fetchJsonDataFromApi(); 
     
         if (typeof jsonData === 'string') {
-            jsonData = jsonData.trim(); // Xóa khoảng trắng thừa
+            jsonData = jsonData.trim(); 
             if (jsonData.startsWith("{") && jsonData.endsWith("}")) {
-                jsonData = jsonData.slice(1, -1); // Cắt bỏ dấu ngoặc nhọn đầu và cuối
+                jsonData = jsonData.slice(1, -1);
             }
-            jsonData = JSON.parse(`{${jsonData}}`); // Chuyển thành đối tượng JSON
+            jsonData = JSON.parse(`{${jsonData}}`); 
         }
     
         if (jsonData) {
             const reportData = {};
-            const currentDate = getCurrentDate(); // Ngày hiện tại
+            const currentDate = getCurrentDate();
     
-            // Duyệt qua jsonData để tạo ra các báo cáo
             Object.keys(jsonData).forEach((key, index) => {
-                let personData = jsonData[key]; // Lấy dữ liệu của từng người
+                let personData = jsonData[key];
                 
-                // Loại bỏ giá trị "T" hoặc "TT" bằng cách thay thế chúng bằng chuỗi trống ""
                 personData = personData.map(item => (item === "T" || item === "TT") ? "" : item);
     
-                // Chỉ lấy phần tên và thông tin cần thiết từ dữ liệu JSON
                 const namePerson = personData[0] || 'Tên không xác định';
                 const attendancePoint = personData[1] || 1;
                 const waterLevelArea = personData[2] || 'Khu vực không xác định';
                 
                 reportData[`report${index + 1}`] = {
-                    userId: user.user_id,  // Lấy ID người dùng từ route params
-                    stt: index + 1,  // Số thứ tự
-                    name_person: namePerson,  // Tên người từ JSON
-                    waterLevelArea: waterLevelArea,  // Khu vực từ JSON
-                    date: currentDate,  // Sử dụng ngày hiện tại
-                    attendancePoint: attendancePoint,  // Điểm danh từ JSON
-                    personalEquipmentCheck: 'checked',  // Kiểm tra thiết bị từ JSON
-                    confirmSign: namePerson,  // Chữ ký xác nhận từ JSON
-                    imageName: 'NoImage',  // Tên file ảnh
+                    userId: user.user_id, 
+                    stt: index + 1, 
+                    name_person: namePerson,  
+                    waterLevelArea: waterLevelArea, 
+                    date: currentDate, 
+                    attendancePoint: attendancePoint,
+                    personalEquipmentCheck: 'checked', 
+                    confirmSign: namePerson, 
+                    imageName: 'NoImage',  
                     mainRubber: {
-                        lo_name: personData[3] || '',  // Lo_name từ JSON
-                        nh3_liters: personData[4] || 0,  // Dữ liệu từ JSON
-                        first_batch_cream: personData[5] || 0,  // Dữ liệu từ JSON
-                        first_batch_block: personData[6] || 0,  // Dữ liệu từ JSON
-                        first_batch_stove: personData[7] || 0,  // Dữ liệu từ JSON
-                        second_batch_block: personData[8] || 0,  // Dữ liệu từ JSON
-                        second_batch_stove: personData[9] || 0,  // Dữ liệu từ JSON
-                        coagulated_latex: personData[10] || 0  // Dữ liệu từ JSON
+                        lo_name: personData[3] || '',
+                        nh3_liters: personData[4] || 0,  
+                        first_batch_cream: personData[5] || 0,  
+                        first_batch_block: personData[6] || 0,  
+                        first_batch_stove: personData[7] || 0,  
+                        second_batch_block: personData[8] || 0,  
+                        second_batch_stove: personData[9] || 0,  
+                        coagulated_latex: personData[10] || 0  
                     },
                     secondaryRubber: {
-                        lo_name: personData[11] || '',  // Lo_name từ JSON
-                        frozen_kg: personData[12] || 0,  // Dữ liệu từ JSON
-                        stew_kg: personData[13] || 0,  // Dữ liệu từ JSON
-                        wire_kg: personData[14] || 0,  // Dữ liệu từ JSON
-                        total_harvest_kg: personData[15] || 0  // Tổng thu hoạch từ JSON
+                        lo_name: personData[11] || '', 
+                        frozen_kg: personData[12] || 0, 
+                        stew_kg: personData[13] || 0, 
+                        wire_kg: personData[14] || 0,  
+                        total_harvest_kg: personData[15] || 0  
                     }
                 };
             });
     
-            // Điều hướng tới NamePersonList với dữ liệu reportData
             navigation.navigate('NamePersonList', { user, reportData });
         }
     };

@@ -34,7 +34,6 @@ function DateReport({ navigation, route }) {
 
   useFocusEffect(
     React.useCallback(() => {
-      // Reset modal state when screen is focused
       setModalVisible(false);
     }, [])
   );

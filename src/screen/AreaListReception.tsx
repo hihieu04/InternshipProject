@@ -4,12 +4,10 @@ import axios from "../api/axios";
 
 const AreaListReception = ({ navigation, route }) => {
     const { user, reportData} = route.params; 
-    const [data, setData] = useState(Object.values(reportData)); // Lưu trữ danh sách báo cáo
+    const [data, setData] = useState(Object.values(reportData)); 
 
-    // Kiểm tra dữ liệu
     console.log('Danh sách dữ liệu:', data);
 
-    // Hàm render từng khu vực và tên người nhận
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.item}
@@ -23,15 +21,14 @@ const AreaListReception = ({ navigation, route }) => {
         </TouchableOpacity>
     );
 
-    // Hàm xử lý khi lưu chỉnh sửa từ trang EditDataReception
+
     const handleSaveChanges = (updatedReportData) => {
         const newData = data.map(report =>
             report.waterLevelArea === updatedReportData.waterLevelArea ? updatedReportData : report
         );
-        setData(newData); // Cập nhật danh sách báo cáo với dữ liệu đã chỉnh sửa
+        setData(newData); 
     };
 
-    // Hàm gửi toàn bộ báo cáo sau khi hoàn thành chỉnh sửa
     const submitAllReports = async () => {
         try {
             const response = await axios.post('/receptionreports/create', { reports: data });

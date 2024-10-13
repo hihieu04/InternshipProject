@@ -17,11 +17,9 @@ function Login({ navigation }): React.JSX.Element {
                 password: password,
             });
     
-            // Xử lý phản hồi từ server
             const result = response.data;
     
             if (response.status === 200) {
-                // Điều hướng đến trang Manage sau khi đăng nhập thành công
                 navigation.navigate('Manage', { 
                     user: result
                 });
@@ -31,10 +29,8 @@ function Login({ navigation }): React.JSX.Element {
         } catch (error) {
             console.error('Error:', error);
             if (error.response) {
-                // Xử lý các lỗi từ phía server
                 Alert.alert('Login Failed', error.response.data.message || 'Invalid username or password');
             } else {
-                // Xử lý lỗi liên quan đến mạng hoặc các vấn đề khác
                 Alert.alert('Error', 'Something went wrong. Please try again later.');
             }
         }

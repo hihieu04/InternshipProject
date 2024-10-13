@@ -18,11 +18,11 @@ function Manage({navigation, route}) {
         <NavigationContainer independent={true}>
             <Tab.Navigator
                 screenOptions={{
-                    tabBarActiveTintColor: 'green',  // Màu của tab đang được chọn
-                    tabBarInactiveTintColor: 'gray', // Màu của tab không được chọn
+                    tabBarActiveTintColor: 'green',  
+                    tabBarInactiveTintColor: 'gray', 
                     tabBarStyle: {
-                        backgroundColor: '#f8f8f8', // Màu nền của thanh tab
-                        borderTopWidth: 0, // Xóa đường viền phía trên
+                        backgroundColor: '#f8f8f8', 
+                        borderTopWidth: 0, 
                     },
                     headerShown: false,
                 }}

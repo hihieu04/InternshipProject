@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, ScrollView, StatusBar, TouchableOpac
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const EditData = ({ navigation, route }) => {
-    const { user, reportData, onSave } = route.params;  // Lấy thêm chỉ số và setData
+    const { user, reportData, onSave } = route.params;  
     const [date, setDate] = useState(new Date(reportData.date));
     const [waterLevelArea, setWaterLevelArea] = useState(reportData.waterLevelArea);
     const [attendancePoint, setAttendancePoint] = useState(!!reportData.attendancePoint);

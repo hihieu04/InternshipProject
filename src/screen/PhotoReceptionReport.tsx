@@ -33,13 +33,11 @@ function PhotoReceptionReport({ navigation }) {
       const directoryPath = `${RNFS.ExternalStorageDirectoryPath}/Pictures`;
 
       try {
-        // Create the directory if it doesn't exist
         const dirExists = await RNFS.exists(directoryPath);
         if (!dirExists) {
           await RNFS.mkdir(directoryPath);
         }
 
-        // Copy the file to the destination path
         await RNFS.copyFile(photo, destPath);
         console.log('Photo saved to', destPath);
       } catch (error) {
