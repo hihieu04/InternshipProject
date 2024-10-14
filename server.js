@@ -23,7 +23,6 @@ sql.connect(config, function (err) {
     console.log('Connected to database!');
 });
 
-//Login
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -73,10 +72,8 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
-//EditData
 app.post('/datereports/create', async (req, res) => {
-    const { reports } = req.body; // Lấy mảng báo cáo từ request body
+    const { reports } = req.body; 
 
     try {
         for (const report of reports) {
@@ -99,7 +96,7 @@ app.post('/datereports/create', async (req, res) => {
             const reportId = dateReportResult.recordset[0].report_id;
             console.log('Generated reportId:', reportId);
 
-            // Xử lý dữ liệu cho bảng MainRubber
+
             const mainRubberRequest = new sql.Request();
             const mainRubberQuery = `INSERT INTO MainRubber 
                          (report_id, lo_name, nh3_liters, first_batch_cream, first_batch_block, first_batch_stove, second_batch_block, second_batch_stove, coagulated_latex)
@@ -116,8 +113,6 @@ app.post('/datereports/create', async (req, res) => {
             mainRubberRequest.input('coagulatedLatex', sql.Float, report.mainRubber.coagulated_latex);
 
             await mainRubberRequest.query(mainRubberQuery);
-
-            // Xử lý dữ liệu cho bảng SecondaryRubber
             const secondaryRubberRequest = new sql.Request();
             const secondaryRubberQuery = `INSERT INTO SecondaryRubber 
                               (report_id, lo_name, frozen_kg, stew_kg, wire_kg, total_harvest_kg)
@@ -265,7 +260,7 @@ app.post('/receptionreports/createOneReport', async (req, res) => {
         res.status(500).send('Error inserting data');
     }
 });
-//DateHistory
+
 app.get('/datereports', (req, res) => {
     const userId = req.query.userId;
 
@@ -300,16 +295,13 @@ app.delete('/datereports/:reportId', async (req, res) => {
 
         const request = new sql.Request(transaction);
 
-        // Xóa MainRubber
         const deleteMainRubberQuery = `DELETE FROM MainRubber WHERE report_id = @reportId`;
         await request.input('reportId', sql.Int, reportId)
             .query(deleteMainRubberQuery);
 
-        // Xóa SecondaryRubber
         const deleteSecondaryRubberQuery = `DELETE FROM SecondaryRubber WHERE report_id = @reportId`;
         await request.query(deleteSecondaryRubberQuery);
 
-        // Xóa DateReport
         const deleteDateReportQuery = `DELETE FROM DateReport WHERE report_id = @reportId`;
         const deleteResult = await request.query(deleteDateReportQuery);
 
@@ -327,7 +319,6 @@ app.delete('/datereports/:reportId', async (req, res) => {
     }
 });
 
-//DateHistoryDetail
 app.get('/history/datereports/:reportId', async (req, res) => {
     const reportId = req.params.reportId;
 
@@ -442,8 +433,6 @@ app.post('/history/datereports/update', async (req, res) => {
 });
 
 
-//ReceptionReport
-// Lấy danh sách các ReceptionReport của một user
 app.get('/receptionreports', async (req, res) => {
     const { userId } = req.query;
 
@@ -458,7 +447,6 @@ app.get('/receptionreports', async (req, res) => {
     }
 });
 
-// Xóa một ReceptionReport theo reception_report_id
 app.delete('/receptionreports/:reportId', async (req, res) => {
     const { reportId } = req.params;
 
@@ -473,7 +461,6 @@ app.delete('/receptionreports/:reportId', async (req, res) => {
     }
 });
 
-// Sửa một ReceptionReport theo reception_report_id
 app.post('/history/receptionreports/update', async (req, res) => {
     const { reception_report_id,water_level_area, license_plate, cream_latex_kg, block_latex_kg, sheet_latex_kg, frozen_latex_kg, cup_latex_kg, wire_latex_kg, total_harvest_latex_kg, date } = req.body;
 
@@ -508,7 +495,6 @@ app.post('/history/receptionreports/update', async (req, res) => {
     }
 });
 
-// Hiển thị chi tiết một ReceptionReport theo reception_report_id
 app.get('/receptionreports/:reportId', async (req, res) => {
     const { reportId } = req.params;
 

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from 'react-na
 import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 
-function UploadDate({ navigation, route }) {
+function UploadReception({ navigation, route }) {
     const { user } = route.params;
     const [selectedImage, setSelectedImage] = useState(null);
     const [jsonData, setJsonData] = useState(null); 
@@ -92,6 +92,7 @@ function UploadDate({ navigation, route }) {
             navigation.navigate('AreaListReception', { user, reportData });
         }
     };
+}
     
 
     return (
@@ -185,4 +186,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default UploadDate;
+export default UploadReception;

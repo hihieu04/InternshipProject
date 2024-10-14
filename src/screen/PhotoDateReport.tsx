@@ -1,30 +1,48 @@
-import { Camera, CameraType } from 'expo-camera/legacy';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Button } from 'react-native';
-import * as MediaLibrary from 'expo-media-library';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, StatusBar, Button, PermissionsAndroid } from 'react-native';
+import { launchCamera } from 'react-native-image-picker';
+import RNFS from 'react-native-fs';
 
 function PhotoDateReport({ navigation }) {
   const [photo, setPhoto] = useState(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState(null);
-  const [camera, setCamera ] = useState(null);
-  const [image, setImage] = useState(null);
-  const [type, setType] = useState(CameraType.back)
 
-  useEffect(() => {
-    (async () => {
-      const cameraStatus = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraStatus.status === 'granted');
-    })();
-  }, []);
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA);
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        launchCamera({ mediaType: 'photo', saveToPhotos: true }, (response) => {
+          if (response.didCancel) {
+            console.log('User cancelled image picker');
+          } else if (response.error) {
+            console.log('ImagePicker Error: ', response.error);
+          } else {
+            setPhoto(response.assets[0].uri);
+          }
+        });
+      } else {
+        console.log('Tu choi');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
-  if (hasCameraPermission === false) {
-    return <Text>No Camera Access</Text>;
-  }
+  const savePhoto = async () => {
+    if (photo) {
+      const destPath = `${RNFS.ExternalStorageDirectoryPath}/Pictures/photo_${Date.now()}.jpg`;
+      const directoryPath = `${RNFS.ExternalStorageDirectoryPath}/Pictures`;
 
-  const takePicture = async () => {
-    if (camera) {
-      const data = await camera.takePictureAsync(null)
-      setImage(data.uri)
+      try {
+        const dirExists = await RNFS.exists(directoryPath);
+        if (!dirExists) {
+          await RNFS.mkdir(directoryPath);
+        }
+
+        await RNFS.copyFile(photo, destPath);
+        console.log('Photo saved to', destPath);
+      } catch (error) {
+        console.log('Error saving photo:', error);
+      }
     }
   };
 
@@ -41,17 +59,11 @@ function PhotoDateReport({ navigation }) {
         </TouchableOpacity>
       </View>
       <View style={styles.contentContainer}>
-        <View style={styles.cameraContainer}>
-          {photo ? (
-            <Image source={{ uri: photo }} style={styles.image} />
-          ) : (
-            <Camera style={styles.camera} type={CameraType.back}>
-              <View style={styles.cameraOverlay}>
-                <Button title="Chụp hình" onPress={takePicture} />
-              </View>
-            </Camera>
-          )}
+        <View style={styles.oval}>
+          {photo && <Image source={{ uri: photo }} style={styles.image} />}
         </View>
+        <Button title="Chụp hình" onPress={requestCameraPermission} />
+        <Button title="Gửi báo cáo" onPress={savePhoto} />
       </View>
     </View>
   );
@@ -86,29 +98,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  cameraContainer: {
+  oval: {
     width: 200,
     height: 300,
-    borderRadius: 20,
-    overflow: 'hidden',
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
   },
-  camera: {
-    width: '100%',
-    height: '100%',
-  },
-  cameraOverlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
   image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 20,
+    width: 200,
+    height: 300,
+    borderRadius: 100,
   },
   icon: {
     width: 30,
